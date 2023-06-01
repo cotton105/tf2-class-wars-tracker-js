@@ -3,6 +3,8 @@ const app = express();
 
 const listenPort = 3000;
 
+app.set('view engine', 'pug');
+
 app.use((req, res, next) => {
     let connectingIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     console.log(`Connection to ${req.url} from ${connectingIp}`);
@@ -14,7 +16,11 @@ app.get('/test', (req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-    res.send('Successful response.');
+    let options = {
+        title: 'APP',
+        message: 'Hello world!'
+    };
+    res.render('index', options);
 });
 
 app.all('*', (req, res, next) => {
