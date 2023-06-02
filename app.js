@@ -2,6 +2,7 @@ const log = require('./utils/log');
 const express = require('express');
 const app = express();
 
+const listenUrl = "localhost";
 const listenPort = 3000;
 
 
@@ -28,5 +29,5 @@ app.all('*', (req, res, next) => {
 });
 
 app.listen(listenPort, () => {
-    log.info(`Server listening on port ${listenPort}.`);
+    log.info(`Server listening on http://${listenUrl}:${listenPort}.`);
 });
