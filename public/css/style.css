@@ -10,7 +10,7 @@ body {
 
 .content {
     display: grid;
-    grid-template-columns: 33% 67%;
+    grid-template-columns: 300px auto;
     height: 100%;
     border: 1px solid black;
 }
@@ -21,7 +21,12 @@ body {
 
 #left-panel {
     display: grid;
-    grid-template-rows: 70% 30%;
+    grid-template-rows: 512px auto;
+}
+
+#left-panel iframe {
+    width: 100%;
+    height: 100%;
 }
 
 #right-panel {
