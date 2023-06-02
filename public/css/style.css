@@ -1,21 +1,41 @@
 .content {
     margin: auto;
-    /* border: 2px solid black; */
+    width: 90%;
+    height: 90%;
+    border: 2px solid black;
 }
 
-.merc-select-grids {
+
+#merc-select-grids {
     display: grid;
+    float: left;
     grid-template-columns: auto;
+    width: 33%;
 }
 
-.merc-select-grid {
+#merc-select-grids div {
     display: grid;
     grid-template-columns: auto auto auto;
     border: 2px solid;
 }
-.merc-select-grid:nth-of-type(1) {
+#merc-select-grids div:nth-of-type(1) {
     border-color: blue;
 }
-.merc-select-grid:nth-of-type(2) {
+#merc-select-grids div:nth-of-type(2) {
     border-color: red;
+}
+
+
+#tracking {
+    width: auto;
+}
+
+#settings {
+    height: 10%;
+}
+
+#tracking-grid{
+    display: grid;
+    grid-template-columns: auto auto auto auto auto auto auto auto auto;
+    /* width: auto; */
 }
