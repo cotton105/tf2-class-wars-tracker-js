@@ -5,15 +5,18 @@ html
         title= title
     body
         div.content
-            div#merc-select-grids
-                - var mercs = [ 'Scout', 'Soldier', 'Pyro', 'Demoman', 'Heavy', 'Engineer', 'Medic', 'Sniper', 'Spy' ];
-                for _ in [ 'grid1', 'grid2' ]
-                    div
-                        each name in mercs
-                            button.merc-select= name
-            div#tracking
+            div#left-panel
+                div#server-info
+
+                div#merc-select-grids
+                    - var mercs = [ 'Scout', 'Soldier', 'Pyro', 'Demoman', 'Heavy', 'Engineer', 'Medic', 'Sniper', 'Spy' ];
+                    for _ in [ 'BLU Grid', 'RED Grid' ]
+                        div
+                            each name in mercs
+                                button.merc-select= name
+            div#right-panel
                 div#settings
 
                 div#tracking-grid
-                    for n in [...Array(9 * 9).keys()]
+                    for n in [...Array(10 * 10).keys()]
                         button= n
