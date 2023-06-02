@@ -1,3 +1,4 @@
+const path = require('path');
 const log = require('./utils/log');
 const express = require('express');
 const app = express();
@@ -7,6 +8,7 @@ const listenPort = 3000;
 
 
 app.set('view engine', 'pug');
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
     let connectingIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
