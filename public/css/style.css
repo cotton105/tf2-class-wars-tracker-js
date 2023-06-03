@@ -67,3 +67,10 @@ body {
     text-align: center;
     border: 1px solid black;
 }
+
+.blu-matchup-header {
+    background-color: #abcbff;
+}
+.red-matchup-header {
+    background-color: #ff7d7d;
+}

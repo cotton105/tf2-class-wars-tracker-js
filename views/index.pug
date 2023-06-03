@@ -25,9 +25,9 @@ html
                         tr
                             th
                             for column in mercs
-                                th= column
+                                th.blu-matchup-header= column
                         for row in mercs
                             tr
-                                th= row
+                                th.red-matchup-header= row
                                 for i in mercs
                                     td= '0'
