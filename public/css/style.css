@@ -82,7 +82,19 @@ body {
 }
 
 #settings {
+    display: grid;
+    grid-template-rows: 33% 33% 34%;
+}
 
+#settings > div {
+    display: flex;
+    justify-content: left;
+    gap: 10px;
+    margin: 10px;
+    align-items: center;
+}
+#settings > div > select {
+    width: 200px;
 }
 
 #tracking-grid {

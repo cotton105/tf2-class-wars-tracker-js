@@ -23,7 +23,21 @@ html
                             
             div#right-panel
                 div#settings
-
+                    div#map-select
+                        select(id='select-map')
+                            option= 'pl_upward'
+                            option= 'pl_barnblitz'
+                        div
+                            label(for='all-maps') All maps:
+                            input(type='checkbox' id='all-maps' checked)
+                    div#game-mode-select
+                        select(name='game-mode')
+                            option= 'Normal'
+                            option= 'Madness'
+                        div
+                            label(for='all-game-modes') All game modes:
+                            input(type='checkbox' id='all-game-modes' checked)
+                    div= 'Games played in this configuration:'
                 div#tracking-grid
                     table
                         //- Table columns
