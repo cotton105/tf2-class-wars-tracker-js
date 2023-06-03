@@ -1,9 +1,11 @@
 $(document).ready(function () {
-    setGameModeSelectEnabled();
     setMapSelectEnabled();
+    setStageSelectEnabled();
+    setGameModeSelectEnabled();
 
     $('#tracking-grid td').on('click', matchupTableClickHandler);
     $('#all-maps').on('click', setMapSelectEnabled);
+    $('#all-stages').on('click', setStageSelectEnabled);
     $('#all-game-modes').on('click', setGameModeSelectEnabled);
 });
 
@@ -22,6 +24,11 @@ function matchupTableClickHandler() {
 function setMapSelectEnabled() {
     let enabled = $('#all-maps').prop('checked');
     $('#select-map').prop('disabled', enabled);
+}
+
+function setStageSelectEnabled() {
+    let enabled = $('#all-stages').prop('checked');
+    $('#select-stage').prop('disabled', enabled);
 }
 
 function setGameModeSelectEnabled() {

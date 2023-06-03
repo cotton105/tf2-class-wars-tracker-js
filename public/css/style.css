@@ -97,6 +97,10 @@ body {
     width: 200px;
 }
 
+#settings #select-stage {
+    width: 50px;
+}
+
 #tracking-grid {
     border-top: 2px solid black;
 }
