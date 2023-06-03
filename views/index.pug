@@ -23,15 +23,15 @@ html
                             
             div#right-panel
                 div#settings
-                    div#map-select
+                    div#map
                         select(id='select-map')
                             option= 'pl_upward'
                             option= 'pl_barnblitz'
                         div
                             label(for='all-maps') All maps:
                             input(type='checkbox' id='all-maps' checked)
-                    div#game-mode-select
-                        select(name='game-mode')
+                    div#game-mode
+                        select(id='select-game-mode')
                             option= 'Normal'
                             option= 'Madness'
                         div
