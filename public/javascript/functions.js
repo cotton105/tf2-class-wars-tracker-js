@@ -3,16 +3,27 @@ $(document).ready(function () {
     setStageSelectEnabled();
     setGameModeSelectEnabled();
 
+    $('.record-win').on('click', getMercenaries);  //TODO: change function, current is just for testing
     $('#tracking-grid td').on('click', matchupTableClickHandler);
     $('#all-maps').on('click', setMapSelectEnabled);
     $('#all-stages').on('click', setStageSelectEnabled);
     $('#all-game-modes').on('click', setGameModeSelectEnabled);
 });
 
+const listenAddress = window.location.origin;
 const selectedMercs = {
     blu: null,
     red: null
 };
+
+function getMercenaries() {
+    $.ajax({
+        url: `${listenAddress}/api/getMercenaries`
+    })
+    .done((data) => {
+        console.log(data);
+    });
+}
 
 function matchupTableClickHandler() {
     let parents = $(this).data('parents');

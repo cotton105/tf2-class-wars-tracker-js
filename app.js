@@ -1,21 +1,25 @@
 const path = require('path');
-const log = require('./utils/log');
 const express = require('express');
 const app = express();
 
-const listenUrl = "localhost";
-const listenPort = 3000;
+const log = require('./utils/log');
+
+global.appRoot = path.resolve(__dirname);
+global.listenHost = 'localhost';
+global.listenPort = 3000;
+global.listenAddress = `http://${listenHost}:${listenPort}`;
 
 
 app.set('view engine', 'pug');
-app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(express.static(path.join(appRoot, 'public')));
 app.use(recordConnection);
+
 app.get('/', renderHomepage);
+app.use('/api', require('./routes/db'));
 app.all('*', catchPageNotFound);
 
 app.listen(listenPort, () => {
-    log.info(`Server listening on http://${listenUrl}:${listenPort}.`);
+    log.info(`Server listening on ${listenAddress}.`);
 });
 
 
