@@ -2,14 +2,17 @@ html
     head
         block styles
             link(rel='stylesheet' type='text/css' href='/css/style.css')
+        block scripts
+            script(type='text/javascript' src='https://code.jquery.com/jquery-3.7.0.min.js')
+            script(type='text/javascript' src='/javascript/jquerytest.js')
         title= title
     body
         div.content
+            - var mercs = [ 'Scout', 'Soldier', 'Pyro', 'Demoman', 'Heavy', 'Engineer', 'Medic', 'Sniper', 'Spy' ];
             div#left-panel
                 div#server-info
                     iframe(frameborder='0' scrolling='no' src='https://cache.gametracker.com/components/html0/?host=31.186.251.170:27015&bgColor=333333&fontColor=cccccc&titleBgColor=222222&titleColor=ff9900&borderColor=555555&linkColor=ffcc00&borderLinkColor=222222&showMap=1&currentPlayersHeight=200&showCurrPlayers=1&showTopPlayers=0&showBlogs=0&width=300')
                 div#merc-select-grids
-                    - var mercs = [ 'Scout', 'Soldier', 'Pyro', 'Demoman', 'Heavy', 'Engineer', 'Medic', 'Sniper', 'Spy' ];
                     for _ in [ 'BLU Grid', 'RED Grid' ]
                         div
                             each name in mercs
@@ -18,5 +21,13 @@ html
                 div#settings
 
                 div#tracking-grid
-                    for n in [...Array(10 * 10).keys()]
-                        button= n
+                    table
+                        tr
+                            th
+                            for column in mercs
+                                th= column
+                        for row in mercs
+                            tr
+                                th= row
+                                for i in mercs
+                                    td= '0'
