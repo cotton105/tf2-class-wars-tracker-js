@@ -4,7 +4,7 @@ html
             link(rel='stylesheet' type='text/css' href='/css/style.css')
         block scripts
             script(type='text/javascript' src='https://code.jquery.com/jquery-3.7.0.min.js')
-            script(type='text/javascript' src='/javascript/jquerytest.js')
+            script(type='text/javascript' src='/javascript/functions.js')
         title= title
     body
         div.content
@@ -22,12 +22,15 @@ html
 
                 div#tracking-grid
                     table
+                        //- Table columns
                         tr
-                            th
-                            for column in mercs
-                                th.blu-matchup-header= column
-                        for row in mercs
+                            th= 'Unselect'
+                            for bluName in mercs
+                                th.blu-matchup-header= bluName
+                        //- Table rows
+                        for redName, y in mercs
                             tr
-                                th.red-matchup-header= row
-                                for i in mercs
-                                    td= '0'
+                                th.red-matchup-header= redName
+                                for _, x in mercs
+                                    - let parents = JSON.stringify({ blu: x, red: y });
+                                    td(data-parents=parents)= '0'
