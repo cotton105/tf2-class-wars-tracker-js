@@ -10,6 +10,7 @@ const dbLocation = `${appRoot}/classwars-matchups.db`;
 
 router.get('/getMercenaries', getMercenaries);
 router.get('/getMaps', getMaps);
+router.get('/getGameModes', getGameModes);
 router.get('/getMatchupWins', getMatchupWins);
 router.post('/incrementWins', incrementWins);
 
@@ -47,6 +48,20 @@ function getMaps(req, res) {
     const query = 'SELECT MapID, ObjectiveID, MapName FROM Map';
     const db = getDatabaseConnection(sqlite3.OPEN_READONLY, getMaps.name);
     db.all(query, [], (error, rows) => {
+        if (error) {
+            log.error(error.message);
+            res.status(500).send(error.message);
+        } else {
+            res.send(rows);
+        }
+    });
+    closeDatabaseConnection(db);
+}
+
+function getGameModes(req, res) {
+    const query = 'SELECT GameModeID, GameModeName FROM GameMode';
+    const db = getDatabaseConnection(sqlite3.OPEN_READONLY, getGameModes.name);
+    db.all(query, (error, rows) => {
         if (error) {
             log.error(error.message);
             res.status(500).send(error.message);

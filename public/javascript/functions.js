@@ -3,8 +3,9 @@ $(document).ready(function () {
     setStageSelectEnabled();
     setGameModeSelectEnabled();
     setSelectionBoxMaps();
+    setSelectionBoxGameModes();
 
-    $('.record-win').on('click', getMatchupWins);  //TODO: change function, current is just for testing
+    $('.record-win').on('click', fetchMatchupWins);  //TODO: change function, current is just for testing
     $('#tracking-grid td').on('click', matchupTableClickHandler);
     $('#all-maps').on('click', setMapSelectEnabled);
     $('#all-stages').on('click', setStageSelectEnabled);
@@ -29,7 +30,7 @@ function getMercenaries() {
     });
 }
 
-async function getMatchupWins() {
+async function fetchMatchupWins() {
     return new Promise((resolve, reject) => {
         let options = {
             url: `${listenAddress}/api/getMatchupWins`,
@@ -47,7 +48,7 @@ async function getMatchupWins() {
     });
 }
 
-async function getMaps() {
+async function fetchMaps() {
     return new Promise((resolve, reject) => {
         let options = {
             url: `${listenAddress}/api/getMaps`
@@ -58,10 +59,31 @@ async function getMaps() {
     });
 }
 
+async function fetchGameModes() {
+    return new Promise((resolve, reject) => {
+        let options = {
+            url: `${listenAddress}/api/getGameModes`
+        };
+        $.ajax(options).done((data) => {
+            return resolve(data.map((gameMode) => gameMode.GameModeName));
+        });
+    });
+}
+
 function setSelectionBoxMaps() {
-    getMaps().then((maps) => {
+    fetchMaps().then((maps) => {
         for (let map of maps) {
             $('#select-map').append(`<option>${map}</option>`)
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+}
+
+function setSelectionBoxGameModes() {
+    fetchGameModes().then((gameModes) => {
+        for (let gameMode of gameModes) {
+            $('#select-game-mode').append(`<option>${gameMode}</option>`);
         }
     }).catch((error) => {
         console.error(error);
@@ -72,7 +94,7 @@ function matchupTableClickHandler() {
     let parents = $(this).data('parents');
     selectedMercs.blu = parents.blu;
     selectedMercs.red = parents.red;
-    getMatchupWins().then((matchupWins) => {
+    fetchMatchupWins().then((matchupWins) => {
         console.log(matchupWins);
     }).catch((error) => {
         console.error(error);
