@@ -100,12 +100,7 @@ function getGameModes(req, res) {
 
 //TODO: Change query depending on configuration settings
 function getMatchupScores(req, res) {
-    const query = 
-        'SELECT blu.MercenaryID AS BluMerc, SUM(mtch.BluWins) AS BluWins, SUM(mtch.RedWins) AS RedWins, red.MercenaryID AS RedMerc ' +
-        'FROM Matchup mtch ' +
-            'JOIN Mercenary blu ON blu.MercenaryID = mtch.BluMercenaryID ' +
-            'JOIN Mercenary red ON red.MercenaryID = mtch.RedMercenaryID ' +
-        'GROUP BY mtch.BluMercenaryID, mtch.RedMercenaryID ';
+    const query = 'SELECT * FROM `Overall Scores`';
     const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
     let scoreArray = [...Array(9)].map((e) => Array(9));  // Create empty 9x9 array
     db.each(query, [], (error, row) => {
