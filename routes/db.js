@@ -33,7 +33,7 @@ async function getMapID(mapName) {
     return new Promise((resolve, reject) => {
         if (!mapName) return reject('No map name provided.');
         const query = 'SELECT MapID FROM Map WHERE MapName = ?';
-        const db = getDatabaseConnection(sqlite3.OPEN_READONLY, getMapID.name);
+        const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
         db.get(query, [mapName], (error, row) => {
             if (error) {
                 log.error(error.message);
@@ -46,7 +46,7 @@ async function getMapID(mapName) {
 
 function getMercenaries(req, res) {
     const query = `SELECT * FROM Mercenary`;
-    const db = getDatabaseConnection(sqlite3.OPEN_READONLY, getMercenaries.name);
+    const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
     db.all(query, [], (error, rows) => {
         if (error) {
             throw error;
@@ -57,7 +57,7 @@ function getMercenaries(req, res) {
 
 function getMaps(req, res) {
     const query = 'SELECT MapID, ObjectiveID, MapName FROM Map';
-    const db = getDatabaseConnection(sqlite3.OPEN_READONLY, getMaps.name);
+    const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
     db.all(query, [], (error, rows) => {
         if (error) {
             log.error(error.message);
@@ -71,7 +71,7 @@ function getMaps(req, res) {
 function getMapStages(req, res) {
     getMapID(req.query.mapName).then((mapID) => {
         const query = 'SELECT StageID, StageNumber FROM Stage WHERE MapID = ?';
-        const db = getDatabaseConnection(sqlite3.OPEN_READONLY, getMapStages.name);
+        const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
         db.all(query, [mapID], (error, rows) => {
             if (error) {
                 error.log(error.message);
@@ -87,7 +87,7 @@ function getMapStages(req, res) {
 
 function getGameModes(req, res) {
     const query = 'SELECT GameModeID, GameModeName FROM GameMode';
-    const db = getDatabaseConnection(sqlite3.OPEN_READONLY, getGameModes.name);
+    const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
     db.all(query, (error, rows) => {
         if (error) {
             log.error(error.message);
@@ -106,7 +106,7 @@ function getMatchupWins(req, res) {
                   'JOIN Mercenary blu ON blu.MercenaryID = mtch.BluMercenaryID ' +
                   'JOIN Mercenary red ON red.MercenaryID = mtch.RedMercenaryID ' +
                   'WHERE blu.MercenaryID = ? AND red.MercenaryID = ?';
-    const db = getDatabaseConnection(sqlite3.OPEN_READONLY, getMatchupWins.name);
+    const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
     db.all(query, [bluMercId, redMercId], (error, rows) => {
         if (error) {
             throw error;
