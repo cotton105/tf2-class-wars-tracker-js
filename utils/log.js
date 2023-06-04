@@ -9,7 +9,7 @@ const errorFile = path.join(logDir, 'error.log');
 const fileSettings = {
     type: 'dateFile',
     numBackups: 3,
-    compress: true,
+    compress: false,
 };
 
 log4js.configure({
