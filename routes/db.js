@@ -19,16 +19,18 @@ function getDatabaseConnection(method, reason=null) {
     return new sqlite3.Database(dbLocation, method, (error) => {
         if (error) {
             return log.error(error.message);
+        } else {
+            log.info(`Connected to the database for reason: ${reason ? reason : 'unknown'}.`);
         }
-        log.info(`Connected to the database for reason: ${reason ? reason : 'unknown'}.`);
     });
 }
 
 function closeDatabaseCallback(error) {
     if (error) {
         log.error(error.message);
+    } else {
+        log.info('Database connection closed.');
     }
-    log.info('Database connection closed.');
 }
 
 async function getMapID(mapName) {
