@@ -7,6 +7,7 @@ $(document).ready(function () {
 
     $('.record-win').on('click', fetchMatchupWins);  //TODO: change function, current is just for testing
     $('#tracking-grid td').on('click', matchupTableClickHandler);
+    $('#select-map').on('change', setSelectedMap);
     $('#all-maps').on('click', setMapSelectEnabled);
     $('#all-stages').on('click', setStageSelectEnabled);
     $('#all-game-modes').on('click', setGameModeSelectEnabled);
@@ -54,7 +55,21 @@ async function fetchMaps() {
             url: `${listenAddress}/api/getMaps`
         };
         $.ajax(options).done((data) => {
-            return resolve(data.map((map) => map.MapName));
+            return resolve(data);
+        });
+    });
+}
+
+async function fetchMapStages() {
+    return new Promise((resolve, reject) => {
+        let options = {
+            url: `${listenAddress}/api/getMapStages`,
+            data: {
+                mapName: selectedMap
+            }
+        };
+        $.ajax(options).done((data) => {
+            return resolve(data);
         });
     });
 }
@@ -73,7 +88,23 @@ async function fetchGameModes() {
 function setSelectionBoxMaps() {
     fetchMaps().then((maps) => {
         for (let map of maps) {
-            $('#select-map').append(`<option>${map}</option>`)
+            $('#select-map').append(`<option value='${map}'>${map}</option>`)
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+}
+
+function setSelectedMap() {
+    selectedMap = $('#select-map option:selected').val();
+    setSelectionBoxStages();
+}
+
+function setSelectionBoxStages() {
+    fetchMapStages().then((stages) => {
+        $('#select-stage option').remove();
+        for (let stage of stages) {
+            $('#select-stage').append(`<option>${stage}</option>`);
         }
     }).catch((error) => {
         console.error(error);

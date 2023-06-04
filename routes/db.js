@@ -10,6 +10,7 @@ const dbLocation = `${appRoot}/classwars-matchups.db`;
 
 router.get('/getMercenaries', getMercenaries);
 router.get('/getMaps', getMaps);
+router.get('/getMapStages', getMapStages);
 router.get('/getGameModes', getGameModes);
 router.get('/getMatchupWins', getMatchupWins);
 router.post('/incrementWins', incrementWins);
@@ -23,25 +24,37 @@ function getDatabaseConnection(method, reason=null) {
     });
 }
 
-function closeDatabaseConnection(db) {
-    db.close((error) => {
-        if (error) {
-            log.error(error.message);
-        }
-        log.info('Database connection closed.');
+function closeDatabaseCallback(error) {
+    if (error) {
+        log.error(error.message);
+    }
+    log.info('Database connection closed.');
+}
+
+async function getMapID(mapName) {
+    return new Promise((resolve, reject) => {
+        if (!mapName) return reject('No map name provided.');
+        const query = 'SELECT MapID FROM Map WHERE MapName = ?';
+        const db = getDatabaseConnection(sqlite3.OPEN_READONLY, getMapID.name);
+        db.get(query, [mapName], (error, row) => {
+            if (error) {
+                log.error(error.message);
+                return reject(error);
+            }
+            return resolve(row.MapID);
+        }).close(closeDatabaseCallback);
     });
 }
 
 function getMercenaries(req, res) {
-    const db = getDatabaseConnection(sqlite3.OPEN_READONLY, getMercenaries.name);
     const query = `SELECT * FROM Mercenary`;
+    const db = getDatabaseConnection(sqlite3.OPEN_READONLY, getMercenaries.name);
     db.all(query, [], (error, rows) => {
         if (error) {
             throw error;
         }
-        res.send(rows);
-    });
-    closeDatabaseConnection(db);
+        res.send(rows.map((row) => row.MercenaryName));
+    }).close(closeDatabaseCallback);
 }
 
 function getMaps(req, res) {
@@ -52,10 +65,26 @@ function getMaps(req, res) {
             log.error(error.message);
             res.status(500).send(error.message);
         } else {
-            res.send(rows);
+            res.send(rows.map((row) => row.MapName));
         }
+    }).close(closeDatabaseCallback);
+}
+
+function getMapStages(req, res) {
+    getMapID(req.query.mapName).then((mapID) => {
+        const query = 'SELECT StageID, StageNumber FROM Stage WHERE MapID = ?';
+        const db = getDatabaseConnection(sqlite3.OPEN_READONLY, getMapStages.name);
+        db.all(query, [mapID], (error, rows) => {
+            if (error) {
+                error.log(error.message);
+                res.status(500).send(error.message);
+            } else {
+                res.send(rows.map((row) => row.StageNumber));
+            }
+        }).close(closeDatabaseCallback);
+    }).catch((error) => {
+        log.error(error);
     });
-    closeDatabaseConnection(db);
 }
 
 function getGameModes(req, res) {
@@ -68,8 +97,7 @@ function getGameModes(req, res) {
         } else {
             res.send(rows);
         }
-    });
-    closeDatabaseConnection(db);
+    }).close(closeDatabaseCallback);
 }
 
 function getMatchupWins(req, res) {
@@ -86,8 +114,7 @@ function getMatchupWins(req, res) {
             throw error;
         }
         res.send(rows);
-    });
-    closeDatabaseConnection(db);
+    }).close(closeDatabaseCallback);
 }
 
 function incrementWins(req, res) {
