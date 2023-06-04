@@ -1,33 +1,44 @@
+const path = require('path');
 const express = require('express');
 const app = express();
 
-const listenPort = 3000;
+const log = require('./utils/log');
+
+global.appRoot = path.resolve(__dirname);
+global.listenHost = 'localhost';
+global.listenPort = 3000;
+global.listenAddress = `http://${listenHost}:${listenPort}`;
+
 
 app.set('view engine', 'pug');
+app.use(express.static(path.join(appRoot, 'public')));
+app.use(recordConnection);
 
-app.use((req, res, next) => {
+app.get('/', renderHomepage);
+app.use('/api', require('./routes/db'));
+app.all('*', catchPageNotFound);
+
+app.listen(listenPort, () => {
+    log.info(`Server listening on ${listenAddress}.`);
+});
+
+
+function recordConnection(req, res, next) {
     let connectingIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    console.log(`Connection to ${req.url} from ${connectingIp}`);
+    log.info(`${req.method} from ${connectingIp} for ${req.url}.`);
     next();
-});
+}
 
-app.get('/test', (req, res, next) => {
-    res.send('test');
-});
-
-app.get('/', (req, res) => {
+function renderHomepage(req, res) {
     let options = {
         title: 'APP',
         message: 'Hello world!'
     };
     res.render('index', options);
-});
+}
 
-app.all('*', (req, res, next) => {
+function catchPageNotFound(req, res, next) {
+    log.info(`${req.url} not found.`);
     res.status(404).send('Error');
     next();
-});
-
-app.listen(listenPort, () => {
-    console.log(`Server listening on port ${listenPort}.`);
-});
+}

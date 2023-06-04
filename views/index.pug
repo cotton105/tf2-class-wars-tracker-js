@@ -1,5 +1,56 @@
 html
     head
+        block styles
+            link(rel='stylesheet' type='text/css' href='/css/style.css')
+        block scripts
+            script(type='text/javascript' src='https://code.jquery.com/jquery-3.7.0.min.js')
+            script(type='text/javascript' src='/javascript/functions.js')
         title= title
     body
-        h1= message
+        div.content
+            - var mercs = [ 'Scout', 'Soldier', 'Pyro', 'Demoman', 'Heavy', 'Engineer', 'Medic', 'Sniper', 'Spy' ];
+            div#left-panel
+                div#server-info
+                    iframe(frameborder='0' scrolling='no' src='https://cache.gametracker.com/components/html0/?host=31.186.251.170:27015&bgColor=333333&fontColor=cccccc&titleBgColor=222222&titleColor=ff9900&borderColor=555555&linkColor=ffcc00&borderLinkColor=222222&showMap=1&currentPlayersHeight=200&showCurrPlayers=1&showTopPlayers=0&showBlogs=0&width=300')
+                div#merc-select
+                    for team in [ 'BLU', 'RED' ]
+                        div
+                            div
+                                button.record-win(data-team=team)= `+1 ${team} WIN`
+                            div.merc-select-grid
+                                each name in mercs
+                                    button.merc-select= name
+            div#right-panel
+                div#settings
+                    div#map
+                        select(id='select-map')
+                        div
+                            label(for='all-maps') All maps:
+                            input(type='checkbox' id='all-maps' checked)
+                        select(id='select-stage')
+                            option= '1'
+                            option= '2'
+                            option= '3'
+                        div
+                            label(for='all-stages') All stages:
+                            input(type='checkbox' id='all-stages' checked)
+                    div#game-mode
+                        select(id='select-game-mode')
+                        div
+                            label(for='all-game-modes') All game modes:
+                            input(type='checkbox' id='all-game-modes' checked)
+                    div= 'Games played in this configuration:'
+                div#tracking-grid
+                    table
+                        //- Table columns
+                        tr
+                            th= 'Unselect'
+                            for bluName in mercs
+                                th.blu-matchup-header= bluName
+                        //- Table rows
+                        for redName, y in mercs
+                            tr
+                                th.red-matchup-header= redName
+                                for _, x in mercs
+                                    - let parents = JSON.stringify({ blu: x, red: y });
+                                    td(data-parents=parents)= '0'
