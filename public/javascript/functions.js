@@ -34,7 +34,7 @@ function getMercenaries() {
 async function fetchMatchupWins() {
     return new Promise((resolve, reject) => {
         let options = {
-            url: `${listenAddress}/api/getMatchupWins`,
+            url: `${listenAddress}/api/getMatchupScores`,
             data: {
                 bluMercId: selectedMercs.blu + 1,
                 redMercId: selectedMercs.red + 1,

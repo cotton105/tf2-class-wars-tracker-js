@@ -12,13 +12,13 @@ router.get('/getMercenaries', getMercenaries);
 router.get('/getMaps', getMaps);
 router.get('/getMapStages', getMapStages);
 router.get('/getGameModes', getGameModes);
-router.get('/getMatchupWins', getMatchupWins);
+router.get('/getMatchupScores', getMatchupScores);
 router.post('/incrementWins', incrementWins);
 
 function getDatabaseConnection(method) {
     return new sqlite3.Database(dbLocation, method, (error) => {
         if (error) {
-            return log.error(error.message);
+            log.error(error.message);
         }
     });
 }
@@ -98,20 +98,26 @@ function getGameModes(req, res) {
     }).close(closeDatabaseCallback);
 }
 
-function getMatchupWins(req, res) {
-    const bluMercId = parseInt(req.query.bluMercId);
-    const redMercId = parseInt(req.query.redMercId);
-    const query = 'SELECT SUM(mtch.BluWins), SUM(mtch.RedWins) ' +
-                  'FROM Matchup mtch ' +
-                  'JOIN Mercenary blu ON blu.MercenaryID = mtch.BluMercenaryID ' +
-                  'JOIN Mercenary red ON red.MercenaryID = mtch.RedMercenaryID ' +
-                  'WHERE blu.MercenaryID = ? AND red.MercenaryID = ?';
+//TODO: Change query depending on configuration settings
+function getMatchupScores(req, res) {
+    const query = 
+        'SELECT blu.MercenaryID AS BluMerc, SUM(mtch.BluWins) AS BluWins, SUM(mtch.RedWins) AS RedWins, red.MercenaryID AS RedMerc ' +
+        'FROM Matchup mtch ' +
+            'JOIN Mercenary blu ON blu.MercenaryID = mtch.BluMercenaryID ' +
+            'JOIN Mercenary red ON red.MercenaryID = mtch.RedMercenaryID ' +
+        'GROUP BY mtch.BluMercenaryID, mtch.RedMercenaryID ';
     const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
-    db.all(query, [bluMercId, redMercId], (error, rows) => {
+    let scoreArray = [...Array(9)].map((e) => Array(9));  // Create empty 9x9 array
+    db.each(query, [], (error, row) => {
         if (error) {
             throw error;
         }
-        res.send(rows);
+        scoreArray[row.BluMerc - 1][row.RedMerc - 1] = [row.BluWins, row.RedWins];
+    }, (error, count) => {
+        if (error) {
+            throw error;
+        }
+        res.send(scoreArray);
     }).close(closeDatabaseCallback);
 }
 
