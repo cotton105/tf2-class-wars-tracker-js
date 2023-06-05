@@ -4,6 +4,7 @@ $(document).ready(function () {
     setGameModeSelectEnabled();
     setSelectionBoxMaps();
     setSelectionBoxGameModes();
+    setMatchupGridScores();
 
     $('.record-win').on('click', fetchMatchupWins);  //TODO: change function, current is just for testing
     $('#tracking-grid td').on('click', matchupTableClickHandler);
@@ -121,15 +122,24 @@ function setSelectionBoxGameModes() {
     });
 }
 
-function matchupTableClickHandler() {
-    let parents = $(this).data('parents');
-    selectedMercs.blu = parents.blu;
-    selectedMercs.red = parents.red;
-    fetchMatchupWins().then((matchupWins) => {
-        console.log(matchupWins);
+function setMatchupGridScores() {
+    fetchMatchupWins().then(function (data) {
+        for (const bluParent in data) {
+            for (const redParent in bluParent) {
+                const wins = data[bluParent][redParent];
+                const targetCell = $(`#tracking-grid td[data-blu-parent="${bluParent}"][data-red-parent=${redParent}]`);
+                targetCell.attr('data-blu-wins', wins[0]);
+                targetCell.attr('data-red-wins', wins[1]);
+            }
+        }
     }).catch((error) => {
         console.error(error);
     });
+}
+
+function matchupTableClickHandler() {
+    selectedMercs.blu = $(this).data('blu-parent');
+    selectedMercs.red = $(this).data('red-parent');
     console.log(selectedMercs);
 }
 

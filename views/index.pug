@@ -52,5 +52,4 @@ html
                             tr
                                 th.red-matchup-header= redName
                                 for _, x in mercs
-                                    - let parents = JSON.stringify({ blu: x, red: y });
-                                    td(data-parents=parents)= '0'
+                                    td(data-blu-parent=x data-red-parent=y)
