@@ -130,6 +130,8 @@ function setMatchupGridScores() {
                 const targetCell = $(`#tracking-grid td[data-blu-parent="${bluParent}"][data-red-parent=${redParent}]`);
                 targetCell.attr('data-blu-wins', wins[0]);
                 targetCell.attr('data-red-wins', wins[1]);
+                const calculatedBias = bias(wins[0], wins[1]);
+                targetCell.text(calculatedBias.toFixed(2));
             }
         }
     }).catch((error) => {
