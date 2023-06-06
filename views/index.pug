@@ -4,6 +4,7 @@ html
             link(rel='stylesheet' type='text/css' href='/css/style.css')
         block scripts
             script(type='text/javascript' src='https://code.jquery.com/jquery-3.7.0.min.js')
+            script(type='text/javascript' src='/javascript/calculate.js')
             script(type='text/javascript' src='/javascript/functions.js')
         title= title
     body
@@ -52,5 +53,4 @@ html
                             tr
                                 th.red-matchup-header= redName
                                 for _, x in mercs
-                                    - let parents = JSON.stringify({ blu: x, red: y });
-                                    td(data-parents=parents)= '0'
+                                    td(data-blu-parent=x data-red-parent=y)
