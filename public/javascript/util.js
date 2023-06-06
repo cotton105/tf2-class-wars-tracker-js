@@ -1,4 +1,4 @@
-function bias(x, y) {
+function calculateBias(x, y) {
     if (x != 0 && y == 0)
         return -1;
     else

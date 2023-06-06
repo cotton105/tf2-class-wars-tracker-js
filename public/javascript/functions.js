@@ -131,8 +131,8 @@ function setMatchupGridScores() {
                 const targetCell = $(`#tracking-grid td[data-blu-parent="${bluParent}"][data-red-parent=${redParent}]`);
                 targetCell.attr('data-blu-wins', wins[0]);
                 targetCell.attr('data-red-wins', wins[1]);
-                const calculatedBias = bias(wins[0], wins[1]);
-                targetCell.text(calculatedBias.toFixed(2));
+                const bias = calculateBias(wins[0], wins[1]);
+                targetCell.text(bias.toFixed(2));
             }
         }
     }).catch((error) => {
@@ -143,6 +143,8 @@ function setMatchupGridScores() {
 function matchupTableClickHandler() {
     selectedMercs.blu = $(this).data('blu-parent');
     selectedMercs.red = $(this).data('red-parent');
+    $('.highlight').remove();
+    $('<div class="highlight"></div>').appendTo($(this));
     console.log(selectedMercs);
 }
 
