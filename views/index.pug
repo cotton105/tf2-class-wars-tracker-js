@@ -46,11 +46,11 @@ html
                         //- Table columns
                         tr
                             th= 'Unselect'
-                            for bluName in mercs
-                                th.blu-matchup-header= bluName
+                            for bluName, x in mercs
+                                th.blu-matchup-header(data-blu-parent=x data-red-parent=null)= bluName
                         //- Table rows
                         for redName, y in mercs
                             tr
-                                th.red-matchup-header= redName
+                                th.red-matchup-header(data-blu-parent=null data-red-parent=y)= redName
                                 for _, x in mercs
                                     td(data-blu-parent=x data-red-parent=y)
