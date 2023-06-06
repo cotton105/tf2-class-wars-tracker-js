@@ -125,7 +125,8 @@ function setSelectionBoxGameModes() {
 function setMatchupGridScores() {
     fetchMatchupWins().then(function (data) {
         for (const bluParent in data) {
-            for (const redParent in bluParent) {
+            const row = data[bluParent];
+            for (const redParent in row) {
                 const wins = data[bluParent][redParent];
                 const targetCell = $(`#tracking-grid td[data-blu-parent="${bluParent}"][data-red-parent=${redParent}]`);
                 targetCell.attr('data-blu-wins', wins[0]);
