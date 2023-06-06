@@ -25,7 +25,6 @@ const selected = {
     stage: null,
     gameMode: null
 }
-let selectedGameMode;
 
 function getMercenaries() {
     $.ajax({
