@@ -7,7 +7,7 @@ $(document).ready(function () {
     setMatchupGridScores();
 
     $('.record-win').on('click', fetchMatchupWins);  //TODO: change function, current is just for testing
-    $('#tracking-grid th td').on('click', setSelectedClasses);
+    $('#tracking-grid th, td').on('click', setSelectedClasses);
     $('#select-map').on('change', setSelectedMap);
     $('#all-maps').on('click', setMapSelectEnabled);
     $('#all-stages').on('click', setStageSelectEnabled);
@@ -144,10 +144,21 @@ function setMatchupGridScores() {
 }
 
 function setSelectedClasses() {
-    selected.merc.blu = $(this).data('blu-parent');
-    selected.merc.red = $(this).data('red-parent');
     $('.highlight').remove();
-    $('<div class="highlight"></div>').appendTo($(this));
+    if ($(this).data('blu-parent') == null && $(this).data('red-parent') == null) {
+        selected.merc.blu = null;
+        selected.merc.red = null;
+    } else {
+        selected.merc.blu = $(this).data('blu-parent') ?? selected.merc.blu;
+        selected.merc.red = $(this).data('red-parent') ?? selected.merc.red;
+    }
+    const highlight = '<div class="highlight"></div>';
+    const biasCell = $(`#tracking-grid td[data-blu-parent=${selected.merc.blu}][data-red-parent=${selected.merc.red}]`);
+    const bluHeader = $(`#tracking-grid th[data-blu-parent=${selected.merc.blu}]`);
+    const redHeader = $(`#tracking-grid th[data-red-parent=${selected.merc.red}]`);
+    $(highlight).appendTo(biasCell);
+    $(highlight).appendTo(bluHeader);
+    $(highlight).appendTo(redHeader);
     console.log(selected.merc);
 }
 
