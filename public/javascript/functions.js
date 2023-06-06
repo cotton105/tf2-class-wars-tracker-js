@@ -7,7 +7,7 @@ $(document).ready(function () {
     setMatchupGridScores();
 
     $('.record-win').on('click', fetchMatchupWins);  //TODO: change function, current is just for testing
-    $('#tracking-grid td').on('click', matchupTableClickHandler);
+    $('#tracking-grid th td').on('click', setSelectedClasses);
     $('#select-map').on('change', setSelectedMap);
     $('#all-maps').on('click', setMapSelectEnabled);
     $('#all-stages').on('click', setStageSelectEnabled);
@@ -15,12 +15,16 @@ $(document).ready(function () {
 });
 
 const listenAddress = window.location.origin;
-const selectedMercs = {
-    blu: undefined,
-    red: undefined
-};
-let selectedMap;
-let selectedStage;
+
+const selected = {
+    merc: {
+        blu: null,
+        red: null
+    },
+    map: null,
+    stage: null,
+    gameMode: null
+}
 let selectedGameMode;
 
 function getMercenaries() {
@@ -37,11 +41,11 @@ async function fetchMatchupWins() {
         let options = {
             url: `${listenAddress}/api/getMatchupScores`,
             data: {
-                bluMercId: selectedMercs.blu + 1,
-                redMercId: selectedMercs.red + 1,
-                map: selectedMap,
-                stage: selectedStage,
-                gameMode: selectedGameMode
+                bluMercId: selected.merc.blu + 1,
+                redMercId: selected.merc.red + 1,
+                map: selected.map,
+                stage: selected.stage,
+                gameMode: selected.gameMode
             }
         };
         $.ajax(options).done((data) => {
@@ -66,7 +70,7 @@ async function fetchMapStages() {
         let options = {
             url: `${listenAddress}/api/getMapStages`,
             data: {
-                mapName: selectedMap
+                mapName: selected.map
             }
         };
         $.ajax(options).done((data) => {
@@ -97,7 +101,7 @@ function setSelectionBoxMaps() {
 }
 
 function setSelectedMap() {
-    selectedMap = $('#select-map option:selected').val();
+    selected.map = $('#select-map option:selected').val();
     setSelectionBoxStages();
 }
 
@@ -140,12 +144,12 @@ function setMatchupGridScores() {
     });
 }
 
-function matchupTableClickHandler() {
-    selectedMercs.blu = $(this).data('blu-parent');
-    selectedMercs.red = $(this).data('red-parent');
+function setSelectedClasses() {
+    selected.merc.blu = $(this).data('blu-parent');
+    selected.merc.red = $(this).data('red-parent');
     $('.highlight').remove();
     $('<div class="highlight"></div>').appendTo($(this));
-    console.log(selectedMercs);
+    console.log(selected.merc);
 }
 
 function setMapSelectEnabled() {
