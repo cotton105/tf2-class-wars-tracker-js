@@ -144,7 +144,6 @@ function setMatchupGridScores() {
 }
 
 function setSelectedClasses() {
-    $('.highlight').remove();
     if ($(this).data('blu-parent') == null && $(this).data('red-parent') == null) {
         selected.merc.blu = null;
         selected.merc.red = null;
@@ -152,14 +151,19 @@ function setSelectedClasses() {
         selected.merc.blu = $(this).data('blu-parent') ?? selected.merc.blu;
         selected.merc.red = $(this).data('red-parent') ?? selected.merc.red;
     }
+    highlightSelectedClasses();
+    console.log(selected.merc);
+}
+
+function highlightSelectedClasses() {
     const highlight = '<div class="highlight"></div>';
     const biasCell = $(`#tracking-grid td[data-blu-parent=${selected.merc.blu}][data-red-parent=${selected.merc.red}]`);
     const bluHeader = $(`#tracking-grid th[data-blu-parent=${selected.merc.blu}]`);
     const redHeader = $(`#tracking-grid th[data-red-parent=${selected.merc.red}]`);
+    $('.highlight').remove();
     $(highlight).appendTo(biasCell);
     $(highlight).appendTo(bluHeader);
     $(highlight).appendTo(redHeader);
-    console.log(selected.merc);
 }
 
 function setMapSelectEnabled() {
