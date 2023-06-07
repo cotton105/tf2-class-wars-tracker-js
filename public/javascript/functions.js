@@ -115,8 +115,10 @@ function highlightSelectedClasses() {
 }
 
 function setMapSelectEnabled() {
-    let enabled = $('#all-maps-checkbox').prop('checked');
-    $('#select-map').prop('disabled', enabled);
+    let disabled = $('#all-maps-checkbox').prop('checked');
+    $('#select-map').prop('disabled', disabled);
+    selected.map = disabled ? null : $('#select-map option:selected').val();
+    setMatchupGridScores();
 }
 
 function setStageSelectEnabled() {
