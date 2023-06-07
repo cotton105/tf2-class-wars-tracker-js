@@ -29,28 +29,6 @@ function closeDatabaseCallback(error) {
     }
 }
 
-async function insertMatchupsTemp() {
-    return new Promise((resolve, reject) => {
-        const query = 'INSERT INTO Matchup(ConfigurationID, BluMercenaryID, RedMercenaryID) VALUES(?, ?, ?)';
-        const db = getDatabaseConnection(sqlite3.OPEN_READWRITE);
-        db.serialize(() => {
-            for (let configID = 24; configID < 99; configID++) {
-                for (let bluID = 1; bluID <= 9; bluID++) {
-                    for (let redID = 1; redID <= 9; redID++) {
-                        db.run(query, [configID, bluID, redID], (error) => {
-                            if (error) {
-                                return reject(error);;
-                            }
-                        });
-                    }
-                }
-            }
-            log.info('Added data to database.');
-        }).close(closeDatabaseCallback);
-        return resolve();
-    });
-}
-
 async function getMapID(mapName) {
     return new Promise((resolve, reject) => {
         if (!mapName) return reject('No map name provided.');
@@ -141,9 +119,5 @@ function getMatchupScores(req, res) {
 function incrementWins(req, res) {
 
 }
-
-// insertMatchupsTemp().catch((error) => {
-//     log.error(error.message);
-// });
 
 module.exports = router;
