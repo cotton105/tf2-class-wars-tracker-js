@@ -157,13 +157,17 @@ function setSelectedClasses() {
 
 function highlightSelectedClasses() {
     const highlight = '<div class="highlight"></div>';
-    const biasCell = $(`#tracking-grid td[data-blu-parent=${selected.merc.blu}][data-red-parent=${selected.merc.red}]`);
-    const bluHeader = $(`#tracking-grid th[data-blu-parent=${selected.merc.blu}]`);
-    const redHeader = $(`#tracking-grid th[data-red-parent=${selected.merc.red}]`);
+    const highlightTargets = [
+        $(`#tracking-grid td[data-blu-parent=${selected.merc.blu}][data-red-parent=${selected.merc.red}]`),
+        $(`#tracking-grid th[data-blu-parent=${selected.merc.blu}]`),
+        $(`#tracking-grid th[data-red-parent=${selected.merc.red}]`),
+        $(`button.merc-select[data-team=0][data-merc-id=${selected.merc.blu}]`),
+        $(`button.merc-select[data-team=1][data-merc-id=${selected.merc.red}]`)
+    ];
     $('.highlight').remove();
-    $(highlight).appendTo(biasCell);
-    $(highlight).appendTo(bluHeader);
-    $(highlight).appendTo(redHeader);
+    for (const target of highlightTargets) {
+        $(highlight).appendTo(target);
+    }
 }
 
 function setMapSelectEnabled() {

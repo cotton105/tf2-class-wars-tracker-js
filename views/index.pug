@@ -14,13 +14,13 @@ html
                 div#server-info
                     iframe(frameborder='0' scrolling='no' src='https://cache.gametracker.com/components/html0/?host=31.186.251.170:27015&bgColor=333333&fontColor=cccccc&titleBgColor=222222&titleColor=ff9900&borderColor=555555&linkColor=ffcc00&borderLinkColor=222222&showMap=1&currentPlayersHeight=200&showCurrPlayers=1&showTopPlayers=0&showBlogs=0&width=300')
                 div#merc-select
-                    for team in [ 'BLU', 'RED' ]
+                    for team, i in [ 'BLU', 'RED' ]
                         div
                             div
                                 button.record-win(data-team=team)= `+1 ${team} WIN`
                             div.merc-select-grid
-                                each name in mercs
-                                    button.merc-select= name
+                                each name, j in mercs
+                                    button.merc-select(data-team=i data-merc-id=j)= name
             div#right-panel
                 div#settings
                     div#map

@@ -53,6 +53,10 @@ body {
     border-color: red;
 }
 
+.merc-select {
+    position: relative;
+}
+
 .record-win {
     display: block;
     margin: auto;
