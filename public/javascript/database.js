@@ -1,8 +1,6 @@
-const listenAddress = window.location.origin;
-
 function getMercenaries() {
     $.ajax({
-        url: `${listenAddress}/api/getMercenaries`
+        url: `/api/getMercenaries`
     })
     .done((data) => {
         console.log(data);
@@ -12,7 +10,7 @@ function getMercenaries() {
 async function fetchMatchupWins() {
     return new Promise((resolve, reject) => {
         let options = {
-            url: `${listenAddress}/api/getMatchupScores`,
+            url: `/api/getMatchupScores`,
             data: {
                 bluMercId: selected.merc.blu + 1,
                 redMercId: selected.merc.red + 1,
@@ -30,7 +28,7 @@ async function fetchMatchupWins() {
 async function fetchMaps() {
     return new Promise((resolve, reject) => {
         let options = {
-            url: `${listenAddress}/api/getMaps`
+            url: `/api/getMaps`
         };
         $.ajax(options).done((data) => {
             return resolve(data);
@@ -41,7 +39,7 @@ async function fetchMaps() {
 async function fetchMapStages() {
     return new Promise((resolve, reject) => {
         let options = {
-            url: `${listenAddress}/api/getMapStages`,
+            url: `/api/getMapStages`,
             data: {
                 mapName: selected.map
             }
@@ -55,7 +53,7 @@ async function fetchMapStages() {
 async function fetchGameModes() {
     return new Promise((resolve, reject) => {
         let options = {
-            url: `${listenAddress}/api/getGameModes`
+            url: `/api/getGameModes`
         };
         $.ajax(options).done((data) => {
             return resolve(data.map((gameMode) => gameMode.GameModeName));
