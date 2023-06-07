@@ -7,6 +7,7 @@ $(document).ready(function () {
     setMatchupGridScores();
 
     $('.record-win').on('click', fetchMatchupWins);  //TODO: change function, current is just for testing
+    $('.merc-select-grid button').on('click', setSelectedClasses);
     $('#tracking-grid th, td').on('click', setSelectedClasses);
     $('#select-map').on('change', setSelectedMap);
     $('#all-maps').on('click', setMapSelectEnabled);
@@ -161,8 +162,8 @@ function highlightSelectedClasses() {
         $(`#tracking-grid td[data-blu-parent=${selected.merc.blu}][data-red-parent=${selected.merc.red}]`),
         $(`#tracking-grid th[data-blu-parent=${selected.merc.blu}]`),
         $(`#tracking-grid th[data-red-parent=${selected.merc.red}]`),
-        $(`button.merc-select[data-team=0][data-merc-id=${selected.merc.blu}]`),
-        $(`button.merc-select[data-team=1][data-merc-id=${selected.merc.red}]`)
+        $(`button.merc-select[data-blu-parent=${selected.merc.blu}]`),
+        $(`button.merc-select[data-red-parent=${selected.merc.red}]`)
     ];
     $('.highlight').remove();
     for (const target of highlightTargets) {

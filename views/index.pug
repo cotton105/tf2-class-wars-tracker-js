@@ -20,7 +20,10 @@ html
                                 button.record-win(data-team=team)= `+1 ${team} WIN`
                             div.merc-select-grid
                                 each name, j in mercs
-                                    button.merc-select(data-team=i data-merc-id=j)= name
+                                    if team == 'BLU'
+                                        button.merc-select(data-blu-parent=j)= name
+                                    else if team == 'RED'
+                                        button.merc-select(data-red-parent=j)= name
             div#right-panel
                 div#settings
                     div#map
