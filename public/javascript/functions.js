@@ -10,6 +10,7 @@ $(document).ready(function () {
     $('.merc-select-grid button').on('click', setSelectedClasses);
     $('#tracking-grid th, td').on('click', setSelectedClasses);
     $('#select-map').on('change', setSelectedMap);
+    $('#select-stage').on('change', setSelectedStage);
     $('#all-maps').on('click', setMapSelectEnabled);
     $('#all-stages').on('click', setStageSelectEnabled);
     $('#all-game-modes').on('click', setGameModeSelectEnabled);
@@ -38,6 +39,11 @@ function setSelectionBoxMaps() {
 function setSelectedMap() {
     selected.map = $('#select-map option:selected').val();
     setSelectionBoxStages();
+    setMatchupGridScores();
+}
+
+function setSelectedStage() {
+    selected.stage = $('#select-stage option:selected').val();
     setMatchupGridScores();
 }
 
