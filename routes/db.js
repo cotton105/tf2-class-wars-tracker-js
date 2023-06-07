@@ -29,18 +29,25 @@ function closeDatabaseCallback(error) {
     }
 }
 
-async function getMapID(mapName) {
+async function getMapID(mapName, db=null) {
     return new Promise((resolve, reject) => {
         if (!mapName) return reject('No map name provided.');
+        let closeWhenDone = false;
+        if (!db) {
+            db = getDatabaseConnection(sqlite3.OPEN_READONLY);
+            closeWhenDone = true;
+        }
         const query = 'SELECT MapID FROM Map WHERE MapName = ?';
-        const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
         db.get(query, [mapName], (error, row) => {
             if (error) {
                 log.error(error.message);
                 return reject(error);
             }
             return resolve(row.MapID);
-        }).close(closeDatabaseCallback);
+        });
+        if (closeWhenDone) {
+            db.close(closeDatabaseCallback);
+        }
     });
 }
 
@@ -99,8 +106,17 @@ function getGameModes(req, res) {
 }
 
 //TODO: Change query depending on configuration settings
-function getMatchupScores(req, res) {
-    const query = 
+async function getMatchupScores(req, res) {
+    const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
+    const filters = [];
+    if (req.query.map) {
+        await getMapID(req.query.map, db).then((mapID) => {
+            filters.push(`mp.MapID = ${mapID}`);
+        }).catch((error) => {
+            return Promise.reject(error);
+        });
+    }
+    const query = ''.concat(
         'SELECT blu.MercenaryID AS "BluMerc", SUM(mtch.BluWins) AS "BluWins", SUM(mtch.RedWins) AS "RedWins", red.MercenaryID AS "RedMerc" ' +
         'FROM Matchup mtch ' +
             'JOIN StageGameMode cfg ON cfg.ConfigurationID = mtch.ConfigurationID ' +
@@ -108,20 +124,22 @@ function getMatchupScores(req, res) {
             'JOIN GameMode mode ON mode.GameModeID = cfg.GameModeID ' +
             'JOIN Map mp ON mp.MapID = s.MapID ' +
             'JOIN Mercenary blu ON blu.MercenaryID = mtch.BluMercenaryID ' +
-            'JOIN Mercenary red ON red.MercenaryID = mtch.RedMercenaryID ' +
-        'GROUP BY mtch.BluMercenaryID, mtch.RedMercenaryID';
-    const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
+            'JOIN Mercenary red ON red.MercenaryID = mtch.RedMercenaryID ',
+        filters.length > 0 ? `WHERE ${filters.join(' AND ')} ` : '',
+        'GROUP BY mtch.BluMercenaryID, mtch.RedMercenaryID'
+    );
     let scoreArray = [...Array(9)].map((e) => Array(9));  // Create empty 9x9 array
     db.each(query, [], (error, row) => {
         if (error) {
-            throw error;
+            return Promise.reject(error);
         }
         scoreArray[row.BluMerc - 1][row.RedMerc - 1] = [row.BluWins, row.RedWins];
     }, (error, count) => {
         if (error) {
-            throw error;
+            return Promise.reject(error);
         }
         res.send(scoreArray);
+        return Promise.resolve();
     }).close(closeDatabaseCallback);
 }
 

@@ -38,6 +38,7 @@ function setSelectionBoxMaps() {
 function setSelectedMap() {
     selected.map = $('#select-map option:selected').val();
     setSelectionBoxStages();
+    setMatchupGridScores();
 }
 
 function setSelectionBoxStages() {
