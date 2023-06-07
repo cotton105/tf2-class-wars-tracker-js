@@ -11,7 +11,7 @@ $(document).ready(function () {
     $('#tracking-grid th, td').on('click', setSelectedClasses);
     $('#select-map').on('change', setSelectedMap);
     $('#select-stage').on('change', setSelectedStage);
-    $('#all-maps').on('click', setMapSelectEnabled);
+    $('#all-maps-checkbox').on('click', setMapSelectEnabled);
     $('#all-stages').on('click', setStageSelectEnabled);
     $('#all-game-modes').on('click', setGameModeSelectEnabled);
 });
@@ -115,7 +115,7 @@ function highlightSelectedClasses() {
 }
 
 function setMapSelectEnabled() {
-    let enabled = $('#all-maps').prop('checked');
+    let enabled = $('#all-maps-checkbox').prop('checked');
     $('#select-map').prop('disabled', enabled);
 }
 
