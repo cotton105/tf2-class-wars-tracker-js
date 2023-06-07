@@ -56,7 +56,7 @@ async function fetchGameModes() {
             url: `/api/getGameModes`
         };
         $.ajax(options).done((data) => {
-            return resolve(data.map((gameMode) => gameMode.GameModeName));
+            return resolve(data);
         });
     });
 }

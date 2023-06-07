@@ -18,10 +18,11 @@ app.get('/', renderHomepage);
 app.use('/api', require('./routes/db'));
 app.all('*', catchPageNotFound);
 
+app.use(handleError);
+
 app.listen(listenPort, () => {
     log.info(`Server listening on ${listenAddress}.`);
 });
-
 
 function recordConnection(req, res, next) {
     let connectingIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
@@ -40,5 +41,9 @@ function renderHomepage(req, res) {
 function catchPageNotFound(req, res, next) {
     log.info(`${req.url} not found.`);
     res.status(404).send('Error');
-    next();
+}
+
+function handleError(error, req, res, next) {
+    log.error(error.message);
+    res.status(error.status).send(error.message);
 }
