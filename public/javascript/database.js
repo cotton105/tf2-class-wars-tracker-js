@@ -16,7 +16,7 @@ async function fetchMatchupWins() {
                 redMercId: selected.merc.red + 1,
                 map: selected.map,
                 stage: selected.stage,
-                gameMode: selected.gameMode
+                gameModeID: selected.gameMode
             }
         };
         $.ajax(options).done((data) => {

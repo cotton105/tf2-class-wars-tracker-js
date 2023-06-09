@@ -50,8 +50,8 @@ function setSelectedStage() {
 }
 
 function setSelectedGameMode() {
-    selected.gameMode = $('#select-game-mode option:selected').val();
-
+    selected.gameMode = $('#select-game-mode option:selected').data('game-mode-id');
+    setMatchupGridScores();
 }
 
 function setSelectionBoxStages() {
