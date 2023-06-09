@@ -127,13 +127,10 @@ function toggleAllMaps() {
     $('#all-stages-checkbox').prop('disabled', disabled);
     if (disabled) {
         $('#all-stages-checkbox').prop('checked', true);
+        $('#select-stage').prop('disabled', true);
         selected.map = null;
     } else {
         selected.map = $('#select-map option:selected').val();
-    }
-    const allStagesChecked = $('#all-stages-checkbox').prop('checkbox');
-    if (!allStagesChecked) {
-        $('#select-stage').prop('disabled', true);
     }
     setMatchupGridScores();
 }
