@@ -6,7 +6,7 @@ $(document).ready(function () {
     setSelectionBoxGameModes();
     setMatchupGridScores();
 
-    $('.record-win').on('click', fetchMatchupWins);  //TODO: change function, current is just for testing
+    $('.record-win').on('click', incrementWins);
     $('.merc-select-grid button').on('click', setSelectedClasses);
     $('#tracking-grid th, td').on('click', setSelectedClasses);
     $('#select-map').on('change', setSelectedMap);

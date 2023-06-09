@@ -183,8 +183,8 @@ async function getMatchupScores(req, res, next) {
     }
 }
 
-function incrementWins(req, res) {
-
+function incrementWins(req, res, next) {
+    next({ message: '"incrementWins()" not implemented.', status: 501 });
 }
 
 module.exports = router;
