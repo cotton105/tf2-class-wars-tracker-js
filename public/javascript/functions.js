@@ -122,8 +122,10 @@ function setMapSelectEnabled() {
 }
 
 function setStageSelectEnabled() {
-    let enabled = $('#all-stages-checkbox').prop('checked');
-    $('#select-stage').prop('disabled', enabled);
+    let disabled = $('#all-stages-checkbox').prop('checked');
+    $('#select-stage').prop('disabled', disabled);
+    selected.stage = disabled ? null : $('#select-stage option:selected').val();
+    setMatchupGridScores();
 }
 
 function setGameModeSelectEnabled() {
