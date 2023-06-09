@@ -30,7 +30,7 @@ const selected = {
 function setSelectionBoxMaps() {
     fetchMaps().then((maps) => {
         for (let map of maps) {
-            $('#select-map').append(`<option value='${map}'>${map}</option>`)
+            $('#select-map').append(`<option data-map-id='${map.mapID}'>${map.mapName}</option>`);
         }
     }).catch((error) => {
         console.error(error);
@@ -38,7 +38,7 @@ function setSelectionBoxMaps() {
 }
 
 function setSelectedMap() {
-    selected.map = $('#select-map option:selected').val();
+    selected.map = $('#select-map option:selected').data('map-id');
     const allStagesChecked = $('#all-stages-checkbox').prop('checked');
     selected.stage = allStagesChecked ? null : 1;
     setSelectionBoxStages();
@@ -131,7 +131,7 @@ function toggleAllMaps() {
         $('#select-stage').prop('disabled', true);
         selected.map = null;
     } else {
-        selected.map = $('#select-map option:selected').val();
+        selected.map = $('#select-map option:selected').data('map-id');
     }
     setMatchupGridScores();
 }

@@ -93,26 +93,24 @@ function getMaps(req, res, next) {
             log.error(error.message);
             res.status(500).send(error.message);
         } else {
-            res.send(rows.map((row) => row.MapName));
+            res.send(rows.map((row) => {
+                return { mapID: row.MapID, mapName: row.MapName };
+            }));
         }
     }).close(closeDatabaseCallback);
 }
 
 function getMapStages(req, res, next) {
-    getMapID(req.query.mapName).then((mapID) => {
+    const mapID = req.query.mapID;
         const query = 'SELECT StageID, StageNumber FROM Stage WHERE MapID = ?';
         const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
         db.all(query, [mapID], (error, rows) => {
             if (error) {
-                error.log(error.message);
-                res.status(500).send(error.message);
+            next(error);
             } else {
                 res.send(rows.map((row) => row.StageNumber));
             }
         }).close(closeDatabaseCallback);
-    }).catch((error) => {
-        log.error(error);
-    });
 }
 
 function getGameModes(req, res, next) {
@@ -132,19 +130,9 @@ function getGameModes(req, res, next) {
 async function getMatchupScores(req, res, next) {
     try {
         const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
-        let mapID = null;
-        let stageID = null;
+        let mapID = req.query.mapID;
+        let stageID = await getStageID(mapID, req.query.stage, db);
         let gameModeID = req.query.gameModeID;
-        await Promise.all([
-            getMapID(req.query.map, db)
-            .then((result) => {
-                mapID = result;
-                return getStageID(mapID, req.query.stage, db);
-            })
-            .then((result) => {
-                stageID = result;
-            })
-        ]);
         let resultArray = [mapID, stageID, gameModeID];
     
         const dbFilters = [];

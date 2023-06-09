@@ -34,7 +34,7 @@ async function fetchMatchupWins() {
             url: '/api/getMatchupScores',
             method: 'GET',
             data: {
-                map: selected.map,
+                mapID: selected.map,
                 stage: selected.stage,
                 gameModeID: selected.gameMode
             }
@@ -61,7 +61,7 @@ async function fetchMapStages() {
             url: '/api/getMapStages',
             method: 'GET',
             data: {
-                mapName: selected.map
+                mapID: selected.map
             }
         }).done((response) => {
             return resolve(response);
