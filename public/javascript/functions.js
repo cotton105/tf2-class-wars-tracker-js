@@ -1,7 +1,7 @@
 $(document).ready(function () {
     toggleAllMaps();
     toggleAllStages();
-    setGameModeSelectEnabled();
+    toggleAllGameModes();
     setSelectionBoxMaps();
     setSelectionBoxGameModes();
     setMatchupGridScores();
@@ -14,7 +14,7 @@ $(document).ready(function () {
     $('#select-game-mode').on('change', setSelectedGameMode);
     $('#all-maps-checkbox').on('click', toggleAllMaps);
     $('#all-stages-checkbox').on('click', toggleAllStages);
-    $('#all-game-modes').on('click', setGameModeSelectEnabled);
+    $('#all-game-modes').on('click', toggleAllGameModes);
 });
 
 const selected = {
@@ -142,7 +142,9 @@ function toggleAllStages() {
     setMatchupGridScores();
 }
 
-function setGameModeSelectEnabled() {
-    let enabled = $('#all-game-modes').prop('checked');
-    $('#select-game-mode').prop('disabled', enabled);
+function toggleAllGameModes() {
+    let checked = $('#all-game-modes').prop('checked');
+    $('#select-game-mode').prop('disabled', checked);
+    selected.gameMode = checked ? null : $('#select-game-mode option:selected').data('game-mode-id');
+    setMatchupGridScores();
 }
