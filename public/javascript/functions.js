@@ -12,7 +12,7 @@ $(document).ready(function () {
     $('#select-map').on('change', setSelectedMap);
     $('#select-stage').on('change', setSelectedStage);
     $('#all-maps-checkbox').on('click', setMapSelectEnabled);
-    $('#all-stages').on('click', setStageSelectEnabled);
+    $('#all-stages-checkbox').on('click', setStageSelectEnabled);
     $('#all-game-modes').on('click', setGameModeSelectEnabled);
 });
 
@@ -122,7 +122,7 @@ function setMapSelectEnabled() {
 }
 
 function setStageSelectEnabled() {
-    let enabled = $('#all-stages').prop('checked');
+    let enabled = $('#all-stages-checkbox').prop('checked');
     $('#select-stage').prop('disabled', enabled);
 }
 
