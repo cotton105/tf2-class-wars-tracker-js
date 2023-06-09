@@ -27,7 +27,7 @@ app.listen(listenPort, () => {
 
 function recordConnection(req, res, next) {
     let connectingIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    log.info(`${req.method} from ${connectingIp} for ${req.url}.`);
+    log.debug(`${req.method} from ${connectingIp} for ${req.url}.`);
     next();
 }
 
