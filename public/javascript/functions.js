@@ -39,7 +39,8 @@ function setSelectionBoxMaps() {
 
 function setSelectedMap() {
     selected.map = $('#select-map option:selected').val();
-    selected.stage = null;
+    const allStagesChecked = $('#all-stages-checkbox').prop('checked');
+    selected.stage = allStagesChecked ? null : 1;
     setSelectionBoxStages();
     setMatchupGridScores();
 }
@@ -122,10 +123,10 @@ function highlightSelectedClasses() {
 }
 
 function toggleAllMaps() {
-    const disabled = $('#all-maps-checkbox').prop('checked');
-    $('#select-map').prop('disabled', disabled);
-    $('#all-stages-checkbox').prop('disabled', disabled);
-    if (disabled) {
+    const checked = $('#all-maps-checkbox').prop('checked');
+    $('#select-map').prop('disabled', checked);
+    $('#all-stages-checkbox').prop('disabled', checked);
+    if (checked) {
         $('#all-stages-checkbox').prop('checked', true);
         $('#select-stage').prop('disabled', true);
         selected.map = null;
@@ -136,9 +137,9 @@ function toggleAllMaps() {
 }
 
 function toggleAllStages() {
-    let disabled = $('#all-stages-checkbox').prop('checked');
-    $('#select-stage').prop('disabled', disabled);
-    selected.stage = disabled ? null : $('#select-stage option:selected').val();
+    let checked = $('#all-stages-checkbox').prop('checked');
+    $('#select-stage').prop('disabled', checked);
+    selected.stage = checked ? null : $('#select-stage option:selected').val();
     setMatchupGridScores();
 }
 
