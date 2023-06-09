@@ -12,6 +12,7 @@ global.listenAddress = `http://${listenHost}:${listenPort}`;
 
 app.set('view engine', 'pug');
 app.use(express.static(path.join(appRoot, 'public')));
+app.use(express.json());
 app.use(recordConnection);
 
 app.get('/', renderHomepage);

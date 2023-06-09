@@ -10,18 +10,19 @@ function getMercenaries() {
 
 async function incrementWins() {
     return new Promise((resolve, reject) => {
-        const options = {
+        const data = {
+            bluMercID: selected.merc.blu,
+            redMercID: selected.merc.red,
+            map: selected.map,
+            stage: selected.stage,
+            gameModeID: selected.gameMode
+        };
+        $.ajax({
             url: '/api/incrementWins',
             method: 'POST',
-            data: {
-                bluMercID: selected.merc.blu,
-                redMercID: selected.merc.red,
-                map: selected.map,
-                stage: selected.stage,
-                gameModeID: selected.gameMode
-            }
-        };
-        $.ajax(options).done((response) => {
+            headers: { 'Content-Type': 'application/json' },
+            data: JSON.stringify(data)
+        }).done((response) => {
             return resolve(response);
         });
     });
@@ -29,7 +30,7 @@ async function incrementWins() {
 
 async function fetchMatchupWins() {
     return new Promise((resolve, reject) => {
-        const options = {
+        $.ajax({
             url: '/api/getMatchupScores',
             method: 'GET',
             data: {
@@ -37,8 +38,7 @@ async function fetchMatchupWins() {
                 stage: selected.stage,
                 gameModeID: selected.gameMode
             }
-        };
-        $.ajax(options).done((response) => {
+        }).done((response) => {
             return resolve(response);
         });
     });
@@ -46,11 +46,10 @@ async function fetchMatchupWins() {
 
 async function fetchMaps() {
     return new Promise((resolve, reject) => {
-        const options = {
+        $.ajax({
             url: '/api/getMaps',
             method: 'GET'
-        };
-        $.ajax(options).done((response) => {
+        }).done((response) => {
             return resolve(response);
         });
     });
@@ -58,14 +57,13 @@ async function fetchMaps() {
 
 async function fetchMapStages() {
     return new Promise((resolve, reject) => {
-        const options = {
+        $.ajax({
             url: '/api/getMapStages',
             method: 'GET',
             data: {
                 mapName: selected.map
             }
-        };
-        $.ajax(options).done((response) => {
+        }).done((response) => {
             return resolve(response);
         });
     });
@@ -73,11 +71,10 @@ async function fetchMapStages() {
 
 async function fetchGameModes() {
     return new Promise((resolve, reject) => {
-        const options = {
+        $.ajax({
             url: '/api/getGameModes',
             method: 'GET'
-        };
-        $.ajax(options).done((response) => {
+        }).done((response) => {
             return resolve(response);
         });
     });
