@@ -11,6 +11,7 @@ $(document).ready(function () {
     $('#tracking-grid th, td').on('click', setSelectedClasses);
     $('#select-map').on('change', setSelectedMap);
     $('#select-stage').on('change', setSelectedStage);
+    $('#select-game-mode').on('change', setSelectedGameMode);
     $('#all-maps-checkbox').on('click', toggleAllMaps);
     $('#all-stages-checkbox').on('click', toggleAllStages);
     $('#all-game-modes').on('click', setGameModeSelectEnabled);
@@ -24,7 +25,7 @@ const selected = {
     map: null,
     stage: null,
     gameMode: null
-}
+};
 
 function setSelectionBoxMaps() {
     fetchMaps().then((maps) => {
@@ -48,6 +49,11 @@ function setSelectedStage() {
     setMatchupGridScores();
 }
 
+function setSelectedGameMode() {
+    selected.gameMode = $('#select-game-mode option:selected').val();
+
+}
+
 function setSelectionBoxStages() {
     fetchMapStages().then((stages) => {
         $('#select-stage option').remove();
@@ -62,7 +68,8 @@ function setSelectionBoxStages() {
 function setSelectionBoxGameModes() {
     fetchGameModes().then((gameModes) => {
         for (let gameMode of gameModes) {
-            $('#select-game-mode').append(`<option>${gameMode}</option>`);
+            const option = `<option data-game-mode-id=${gameMode.id}>${gameMode.name}</option>`;
+            $('#select-game-mode').append(option);
         }
     }).catch((error) => {
         console.error(error);

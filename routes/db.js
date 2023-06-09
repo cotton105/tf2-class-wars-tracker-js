@@ -74,19 +74,6 @@ async function getStageID(mapID, stageNumber, db=null) {
     });
 }
 
-async function getGameModeID(gameModeName, db=null) {
-    return new Promise((resolve, reject) => {
-        return resolve();
-        // if (!gameModeName) return reject('No game mode name provided.');
-        // let closeWhenDone = false;
-        // if (!db) {
-        //     db = getDatabaseConnection(sqlite3.OPEN_READONLY);
-        //     closeWhenDone = true;
-        // }
-        // const query = 'SELECT GameModeID FROM GameMode WHERE GameModeName = ?';
-    });
-}
-
 function getMercenaries(req, res, next) {
     const query = `SELECT * FROM Mercenary`;
     const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
@@ -133,10 +120,11 @@ function getGameModes(req, res, next) {
     const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
     db.all(query, (error, rows) => {
         if (error) {
-            log.error(error.message);
-            res.status(500).send(error.message);
+            next(error);
         } else {
-            res.send(rows.map((row) => row.GameModeName));
+            res.send(rows.map((row) => { 
+                return { name: row.GameModeName, id: row.GameModeID };
+            }));
         }
     }).close(closeDatabaseCallback);
 }
@@ -146,7 +134,7 @@ async function getMatchupScores(req, res, next) {
         const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
         let mapID = null;
         let stageID = null;
-        let gameModeID = null;
+        let gameModeID = req.query.gameModeID;
         await Promise.all([
             getMapID(req.query.map, db)
             .then((result) => {
@@ -155,9 +143,6 @@ async function getMatchupScores(req, res, next) {
             })
             .then((result) => {
                 stageID = result;
-            }),
-            getGameModeID(req.query.gameMode).then((result) => {
-                gameModeID = result;
             })
         ]);
         let resultArray = [mapID, stageID, gameModeID];
