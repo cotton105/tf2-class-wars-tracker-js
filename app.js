@@ -44,6 +44,6 @@ function catchPageNotFound(req, res, next) {
 }
 
 function handleError(error, req, res, next) {
-    log.error(error.message);
+    log.error(`STATUS ${error.status} ${error.message}`);
     res.status(error.status).send(error.message);
 }
