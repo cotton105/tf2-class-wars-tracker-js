@@ -1,6 +1,6 @@
 $(document).ready(function () {
-    setMapSelectEnabled();
-    setStageSelectEnabled();
+    toggleAllMaps();
+    toggleAllStages();
     setGameModeSelectEnabled();
     setSelectionBoxMaps();
     setSelectionBoxGameModes();
@@ -11,8 +11,8 @@ $(document).ready(function () {
     $('#tracking-grid th, td').on('click', setSelectedClasses);
     $('#select-map').on('change', setSelectedMap);
     $('#select-stage').on('change', setSelectedStage);
-    $('#all-maps-checkbox').on('click', setMapSelectEnabled);
-    $('#all-stages-checkbox').on('click', setStageSelectEnabled);
+    $('#all-maps-checkbox').on('click', toggleAllMaps);
+    $('#all-stages-checkbox').on('click', toggleAllStages);
     $('#all-game-modes').on('click', setGameModeSelectEnabled);
 });
 
@@ -114,14 +114,21 @@ function highlightSelectedClasses() {
     }
 }
 
-function setMapSelectEnabled() {
+function toggleAllMaps() {
     let disabled = $('#all-maps-checkbox').prop('checked');
     $('#select-map').prop('disabled', disabled);
-    selected.map = disabled ? null : $('#select-map option:selected').val();
+    $('#select-stage').prop('disabled', disabled);
+    $('#all-stages-checkbox').prop('disabled', disabled);
+    if (disabled) {
+        $('#all-stages-checkbox').prop('checked', true);
+        selected.map = null;
+    } else {
+        selected.map = $('#select-map option:selected').val();
+    }
     setMatchupGridScores();
 }
 
-function setStageSelectEnabled() {
+function toggleAllStages() {
     let disabled = $('#all-stages-checkbox').prop('checked');
     $('#select-stage').prop('disabled', disabled);
     selected.stage = disabled ? null : $('#select-stage option:selected').val();
