@@ -1,7 +1,7 @@
 $(document).ready(function () {
-    setMapSelectEnabled();
-    setStageSelectEnabled();
-    setGameModeSelectEnabled();
+    toggleAllMaps();
+    toggleAllStages();
+    toggleAllGameModes();
     setSelectionBoxMaps();
     setSelectionBoxGameModes();
     setMatchupGridScores();
@@ -10,12 +10,12 @@ $(document).ready(function () {
     $('.merc-select-grid button').on('click', setSelectedClasses);
     $('#tracking-grid th, td').on('click', setSelectedClasses);
     $('#select-map').on('change', setSelectedMap);
-    $('#all-maps').on('click', setMapSelectEnabled);
-    $('#all-stages').on('click', setStageSelectEnabled);
-    $('#all-game-modes').on('click', setGameModeSelectEnabled);
+    $('#select-stage').on('change', setSelectedStage);
+    $('#select-game-mode').on('change', setSelectedGameMode);
+    $('#all-maps-checkbox').on('click', toggleAllMaps);
+    $('#all-stages-checkbox').on('click', toggleAllStages);
+    $('#all-game-modes').on('click', toggleAllGameModes);
 });
-
-const listenAddress = window.location.origin;
 
 const selected = {
     merc: {
@@ -25,70 +25,7 @@ const selected = {
     map: null,
     stage: null,
     gameMode: null
-}
-
-function getMercenaries() {
-    $.ajax({
-        url: `${listenAddress}/api/getMercenaries`
-    })
-    .done((data) => {
-        console.log(data);
-    });
-}
-
-async function fetchMatchupWins() {
-    return new Promise((resolve, reject) => {
-        let options = {
-            url: `${listenAddress}/api/getMatchupScores`,
-            data: {
-                bluMercId: selected.merc.blu + 1,
-                redMercId: selected.merc.red + 1,
-                map: selected.map,
-                stage: selected.stage,
-                gameMode: selected.gameMode
-            }
-        };
-        $.ajax(options).done((data) => {
-            return resolve(data);
-        });
-    });
-}
-
-async function fetchMaps() {
-    return new Promise((resolve, reject) => {
-        let options = {
-            url: `${listenAddress}/api/getMaps`
-        };
-        $.ajax(options).done((data) => {
-            return resolve(data);
-        });
-    });
-}
-
-async function fetchMapStages() {
-    return new Promise((resolve, reject) => {
-        let options = {
-            url: `${listenAddress}/api/getMapStages`,
-            data: {
-                mapName: selected.map
-            }
-        };
-        $.ajax(options).done((data) => {
-            return resolve(data);
-        });
-    });
-}
-
-async function fetchGameModes() {
-    return new Promise((resolve, reject) => {
-        let options = {
-            url: `${listenAddress}/api/getGameModes`
-        };
-        $.ajax(options).done((data) => {
-            return resolve(data.map((gameMode) => gameMode.GameModeName));
-        });
-    });
-}
+};
 
 function setSelectionBoxMaps() {
     fetchMaps().then((maps) => {
@@ -102,7 +39,19 @@ function setSelectionBoxMaps() {
 
 function setSelectedMap() {
     selected.map = $('#select-map option:selected').val();
+    selected.stage = null;
     setSelectionBoxStages();
+    setMatchupGridScores();
+}
+
+function setSelectedStage() {
+    selected.stage = $('#select-stage option:selected').val();
+    setMatchupGridScores();
+}
+
+function setSelectedGameMode() {
+    selected.gameMode = $('#select-game-mode option:selected').data('game-mode-id');
+    setMatchupGridScores();
 }
 
 function setSelectionBoxStages() {
@@ -119,7 +68,8 @@ function setSelectionBoxStages() {
 function setSelectionBoxGameModes() {
     fetchGameModes().then((gameModes) => {
         for (let gameMode of gameModes) {
-            $('#select-game-mode').append(`<option>${gameMode}</option>`);
+            const option = `<option data-game-mode-id=${gameMode.id}>${gameMode.name}</option>`;
+            $('#select-game-mode').append(option);
         }
     }).catch((error) => {
         console.error(error);
@@ -171,17 +121,30 @@ function highlightSelectedClasses() {
     }
 }
 
-function setMapSelectEnabled() {
-    let enabled = $('#all-maps').prop('checked');
-    $('#select-map').prop('disabled', enabled);
+function toggleAllMaps() {
+    const disabled = $('#all-maps-checkbox').prop('checked');
+    $('#select-map').prop('disabled', disabled);
+    $('#all-stages-checkbox').prop('disabled', disabled);
+    if (disabled) {
+        $('#all-stages-checkbox').prop('checked', true);
+        $('#select-stage').prop('disabled', true);
+        selected.map = null;
+    } else {
+        selected.map = $('#select-map option:selected').val();
+    }
+    setMatchupGridScores();
 }
 
-function setStageSelectEnabled() {
-    let enabled = $('#all-stages').prop('checked');
-    $('#select-stage').prop('disabled', enabled);
+function toggleAllStages() {
+    let disabled = $('#all-stages-checkbox').prop('checked');
+    $('#select-stage').prop('disabled', disabled);
+    selected.stage = disabled ? null : $('#select-stage option:selected').val();
+    setMatchupGridScores();
 }
 
-function setGameModeSelectEnabled() {
-    let enabled = $('#all-game-modes').prop('checked');
-    $('#select-game-mode').prop('disabled', enabled);
+function toggleAllGameModes() {
+    let checked = $('#all-game-modes').prop('checked');
+    $('#select-game-mode').prop('disabled', checked);
+    selected.gameMode = checked ? null : $('#select-game-mode option:selected').data('game-mode-id');
+    setMatchupGridScores();
 }
