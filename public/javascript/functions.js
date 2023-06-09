@@ -122,15 +122,18 @@ function highlightSelectedClasses() {
 }
 
 function toggleAllMaps() {
-    let disabled = $('#all-maps-checkbox').prop('checked');
+    const disabled = $('#all-maps-checkbox').prop('checked');
     $('#select-map').prop('disabled', disabled);
-    $('#select-stage').prop('disabled', disabled);
     $('#all-stages-checkbox').prop('disabled', disabled);
     if (disabled) {
         $('#all-stages-checkbox').prop('checked', true);
         selected.map = null;
     } else {
         selected.map = $('#select-map option:selected').val();
+    }
+    const allStagesChecked = $('#all-stages-checkbox').prop('checkbox');
+    if (!allStagesChecked) {
+        $('#select-stage').prop('disabled', true);
     }
     setMatchupGridScores();
 }
