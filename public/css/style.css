@@ -87,7 +87,7 @@ body {
 
 #settings {
     display: grid;
-    grid-template-rows: 33% 33% 34%;
+    grid-template-rows: 25% 25% 25% 25%;
 }
 
 #settings > div {
