@@ -3,6 +3,7 @@ $(document).ready(function () {
     toggleAllStages();
     toggleAllGameModes();
     setSelectionBoxMaps();
+    setSelectionBoxStages();
     setSelectionBoxGameModes();
     refreshMatchupGrid();
 
@@ -34,7 +35,8 @@ function setSelectionBoxMaps() {
         for (let map of maps) {
             $('#select-map').append(`<option data-map-id='${map.mapID}'>${map.mapName}</option>`);
         }
-    }).catch((error) => {
+    })
+    .catch((error) => {
         console.error(error);
     });
 }
@@ -138,12 +140,14 @@ function toggleAllMaps() {
     $('#select-map').prop('disabled', checked);
     $('#all-stages-checkbox').prop('disabled', checked);
     if (checked) {
-        $('#all-stages-checkbox').prop('checked', true);
         $('#select-stage').prop('disabled', true);
+        $('#all-stages-checkbox').prop('checked', true);
         selected.map = null;
+        selected.stage = null;
     } else {
         selected.map = $('#select-map option:selected').data('map-id');
     }
+    setSelectionBoxStages();
     refreshMatchupGrid();
 }
 
