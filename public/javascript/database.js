@@ -25,7 +25,7 @@ async function incrementWins() {
             headers: { 'Content-Type': 'application/json' },
             data: JSON.stringify(data)
         }).done((response) => {
-            setMatchupGridScores();
+            refreshMatchupGrid();
             return resolve(response);
         });
     });

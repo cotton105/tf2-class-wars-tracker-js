@@ -4,7 +4,7 @@ $(document).ready(function () {
     toggleAllGameModes();
     setSelectionBoxMaps();
     setSelectionBoxGameModes();
-    setMatchupGridScores();
+    refreshMatchupGrid();
 
     $('.record-win').on('click', incrementWins);
     $('.merc-select-grid button').on('click', setSelectedClasses);
@@ -17,6 +17,8 @@ $(document).ready(function () {
     $('#all-game-modes').on('click', toggleAllGameModes);
 });
 
+const BLU_COLOR = '#abcbff';
+const RED_COLOR = '#ff7d7d';
 const selected = {
     merc: {
         blu: null,
@@ -42,17 +44,17 @@ function setSelectedMap() {
     const allStagesChecked = $('#all-stages-checkbox').prop('checked');
     selected.stage = allStagesChecked ? null : 1;
     setSelectionBoxStages();
-    setMatchupGridScores();
+    refreshMatchupGrid();
 }
 
 function setSelectedStage() {
     selected.stage = $('#select-stage option:selected').val();
-    setMatchupGridScores();
+    refreshMatchupGrid();
 }
 
 function setSelectedGameMode() {
     selected.gameMode = $('#select-game-mode option:selected').data('game-mode-id');
-    setMatchupGridScores();
+    refreshMatchupGrid();
 }
 
 function setSelectionBoxStages() {
@@ -77,7 +79,7 @@ function setSelectionBoxGameModes() {
     });
 }
 
-function setMatchupGridScores() {
+function refreshMatchupGrid() {
     fetchMatchupWins().then(function (data) {
         for (const bluParent in data) {
             const row = data[bluParent];
@@ -87,6 +89,14 @@ function setMatchupGridScores() {
                 targetCell.attr('data-blu-wins', wins[0]);
                 targetCell.attr('data-red-wins', wins[1]);
                 const bias = calculateBias(wins[0], wins[1]);
+                let shadeColor = '#ffffff';
+                if (bias < 0) {
+                    shadeColor = BLU_COLOR;
+                } else if (bias > 0) {
+                    shadeColor = RED_COLOR;
+                }
+                shadeColor += parseInt(Math.abs(bias * 255)).toString(16);
+                targetCell.css('background-color', shadeColor);
                 targetCell.text(bias.toFixed(2));
             }
         }
@@ -108,7 +118,7 @@ function setSelectedClasses() {
 }
 
 function highlightSelectedClasses() {
-    const highlight = '<div class="highlight"></div>';
+    const highlight = '<div class="selected-highlight"></div>';
     const highlightTargets = [
         $(`#tracking-grid td[data-blu-parent=${selected.merc.blu}][data-red-parent=${selected.merc.red}]`),
         $(`#tracking-grid th[data-blu-parent=${selected.merc.blu}]`),
@@ -116,7 +126,7 @@ function highlightSelectedClasses() {
         $(`button.merc-select[data-blu-parent=${selected.merc.blu}]`),
         $(`button.merc-select[data-red-parent=${selected.merc.red}]`)
     ];
-    $('.highlight').remove();
+    $('.selected-highlight').remove();
     for (const target of highlightTargets) {
         $(highlight).appendTo(target);
     }
@@ -133,19 +143,19 @@ function toggleAllMaps() {
     } else {
         selected.map = $('#select-map option:selected').data('map-id');
     }
-    setMatchupGridScores();
+    refreshMatchupGrid();
 }
 
 function toggleAllStages() {
     let checked = $('#all-stages-checkbox').prop('checked');
     $('#select-stage').prop('disabled', checked);
     selected.stage = checked ? null : $('#select-stage option:selected').val();
-    setMatchupGridScores();
+    refreshMatchupGrid();
 }
 
 function toggleAllGameModes() {
     let checked = $('#all-game-modes').prop('checked');
     $('#select-game-mode').prop('disabled', checked);
     selected.gameMode = checked ? null : $('#select-game-mode option:selected').data('game-mode-id');
-    setMatchupGridScores();
+    refreshMatchupGrid();
 }

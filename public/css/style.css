@@ -126,7 +126,7 @@ body {
     background-color: #ff7d7d;
 }
 
-.highlight {
+.selected-highlight {
     position: absolute;
     width: 100%;
     height: 100%;
