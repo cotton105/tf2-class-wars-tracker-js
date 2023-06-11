@@ -98,6 +98,7 @@ function refreshMatchupGrid() {
                 }
                 targetCell.css('background-color', shadeColor);
                 targetCell.text(bias.toFixed(2));
+                highlightSelectedClasses();
             }
         }
     }).catch((error) => {
