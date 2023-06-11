@@ -88,6 +88,7 @@ function setMatchupGridScores() {
                 targetCell.attr('data-red-wins', wins[1]);
                 const bias = calculateBias(wins[0], wins[1]);
                 targetCell.text(bias.toFixed(2));
+                highlightSelectedClasses();
             }
         }
     }).catch((error) => {
