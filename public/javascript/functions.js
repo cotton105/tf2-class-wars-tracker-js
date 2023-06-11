@@ -89,13 +89,13 @@ function refreshMatchupGrid() {
                 targetCell.attr('data-blu-wins', wins[0]);
                 targetCell.attr('data-red-wins', wins[1]);
                 const bias = calculateBias(wins[0], wins[1]);
+                const opacity = parseInt(Math.abs(bias * 255)).toString(16);
                 let shadeColor = '#ffffff';
                 if (bias < 0) {
-                    shadeColor = BLU_COLOR;
+                    shadeColor = BLU_COLOR + opacity;
                 } else if (bias > 0) {
-                    shadeColor = RED_COLOR;
+                    shadeColor = RED_COLOR + opacity;
                 }
-                shadeColor += parseInt(Math.abs(bias * 255)).toString(16);
                 targetCell.css('background-color', shadeColor);
                 targetCell.text(bias.toFixed(2));
             }
