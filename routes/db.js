@@ -292,6 +292,7 @@ async function incrementWins(req, res, next) {
                 throw error;
             } else {
                 log.info(`Incremented ${matchupSelection.winningTeam} wins for MatchupID ${matchupID}.`);
+                res.send('Successfully incremented wins.');
             }
         });
         db.close(closeDatabaseCallback);
