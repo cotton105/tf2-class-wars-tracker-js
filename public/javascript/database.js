@@ -10,12 +10,14 @@ function getMercenaries() {
 
 async function incrementWins() {
     return new Promise((resolve, reject) => {
+        const winningTeam = $(this).data('team');
         const data = {
             bluMercID: selected.merc.blu === null ? null : selected.merc.blu + 1,
             redMercID: selected.merc.red === null ? null : selected.merc.red + 1,
-            map: selected.map,
+            mapID: selected.map,
             stage: selected.stage,
-            gameModeID: selected.gameMode
+            gameModeID: selected.gameMode,
+            winningTeam: winningTeam
         };
         $.ajax({
             url: '/api/incrementWins',
