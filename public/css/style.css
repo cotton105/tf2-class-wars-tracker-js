@@ -128,9 +128,12 @@ body {
 
 .selected-highlight {
     position: absolute;
+    box-sizing: border-box;
     width: 100%;
     height: 100%;
     left: 0;
     top: 0;
     background-color: #faffae57;
+    border: solid 1px;
+    border-color: inherit;
 }
