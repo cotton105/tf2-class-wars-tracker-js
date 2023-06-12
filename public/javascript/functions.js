@@ -13,14 +13,15 @@ $(document).ready(function () {
     $('#select-map').on('change', setSelectedMap);
     $('#select-stage').on('change', setSelectedStage);
     $('#select-game-mode').on('change', setSelectedGameMode);
+    $('#overall-checkbox').on('click', toggleOverallOverlay);
     $('#all-maps-checkbox').on('click', toggleAllMaps);
     $('#all-stages-checkbox').on('click', toggleAllStages);
-    $('#all-game-modes').on('click', toggleAllGameModes);
+    $('#all-game-modes-checkbox').on('click', toggleAllGameModes);
 });
 
 const BLU_COLOR = '#abcbff';
 const RED_COLOR = '#ff7d7d';
-const selected = {
+let selected = {
     merc: {
         blu: null,
         red: null
@@ -29,6 +30,7 @@ const selected = {
     stage: null,
     gameMode: null
 };
+let tempSelected = null;
 
 function setSelectionBoxMaps() {
     fetchMaps().then((maps) => {
@@ -135,6 +137,32 @@ function highlightSelectedClasses() {
     }
 }
 
+function toggleOverallOverlay() {
+    const checked = $('#overall-checkbox').prop('checked');
+    if (checked) {
+        tempSelected = { ...selected };
+        emptyObject(selected);
+        $('#select-map').prop('disabled', true);
+        $('#select-stage').prop('disabled', true);
+        $('#select-game-mode').prop('disabled', true);
+        $('#all-maps-checkbox').prop('disabled', true);
+        $('#all-stages-checkbox').prop('disabled', true);
+        $('#all-game-modes-checkbox').prop('disabled', true);
+    } else {
+        selected = tempSelected;
+        const allMapsChecked = $('#all-maps-checkbox').prop('checked');
+        const allStagesChecked = $('#all-stages-checkbox').prop('checked');
+        const allGameModesChecked = $('#all-game-modes-checkbox').prop('checked');
+        $('#all-maps-checkbox').prop('disabled', false);
+        $('#all-stages-checkbox').prop('disabled', allMapsChecked);
+        $('#all-game-modes-checkbox').prop('disabled', false);
+        $('#select-map').prop('disabled', allMapsChecked);
+        $('#select-stage').prop('disabled', allStagesChecked);
+        $('#select-game-mode').prop('disabled', allGameModesChecked);
+    }
+    refreshMatchupGrid();
+}
+
 function toggleAllMaps() {
     const checked = $('#all-maps-checkbox').prop('checked');
     $('#select-map').prop('disabled', checked);
@@ -159,7 +187,7 @@ function toggleAllStages() {
 }
 
 function toggleAllGameModes() {
-    let checked = $('#all-game-modes').prop('checked');
+    let checked = $('#all-game-modes-checkbox').prop('checked');
     $('#select-game-mode').prop('disabled', checked);
     selected.gameMode = checked ? null : $('#select-game-mode option:selected').data('game-mode-id');
     refreshMatchupGrid();
