@@ -57,21 +57,25 @@ body {
     position: relative;
 }
 
-.record-win {
+.record-win-div {
+    display: flex;
+}
+
+.record-win-button {
     display: block;
     margin: auto;
     border: solid 
 }
-.record-win[data-team='BLU'] {
+.record-win-button[data-team='BLU'] {
     border: solid blue 1px;
 }
-.record-win[data-team='BLU']:hover {
+.record-win-button[data-team='BLU']:hover {
     background-color: #abcbff;
 }
-.record-win[data-team='RED'] {
+.record-win-button[data-team='RED'] {
     border: solid red 1px;
 }
-.record-win[data-team='RED']:hover {
+.record-win-button[data-team='RED']:hover {
     background-color: #ff7d7d;
 }
 

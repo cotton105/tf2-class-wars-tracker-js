@@ -31,6 +31,29 @@ async function incrementWins() {
     });
 }
 
+async function decrementWins() {
+    return new Promise((resolve, reject) => {
+        const team = $(this).data('team');
+        const data = {
+            bluMercID: selected.merc.blu === null ? null : selected.merc.blu + 1,
+            redMercID: selected.merc.red === null ? null : selected.merc.red + 1,
+            mapID: selected.map,
+            stage: selected.stage,
+            gameModeID: selected.gameMode,
+            team: team
+        };
+        $.ajax({
+            url: '/api/decrementWins',
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            data: JSON.stringify(data)
+        }).done((response) => {
+            refreshMatchupGrid();
+            return resolve(response);
+        });
+    });
+}
+
 async function fetchMatchupWins() {
     return new Promise((resolve, reject) => {
         $.ajax({

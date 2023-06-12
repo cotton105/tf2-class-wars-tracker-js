@@ -17,8 +17,9 @@ html
                 div#merc-select
                     for team, i in [ 'BLU', 'RED' ]
                         div
-                            div
-                                button.record-win(data-team=team)= `+1 ${team} WIN`
+                            div.record-win-div(data-team=team)
+                                button.record-win-button(data-team=team)= `+1 ${team} WIN`
+                                button.decrement-win-button(data-team=team)= '-1'
                             div.merc-select-grid
                                 each name, j in mercs
                                     if team == 'BLU'
