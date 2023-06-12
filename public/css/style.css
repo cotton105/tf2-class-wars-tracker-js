@@ -135,6 +135,6 @@ body {
     left: 0;
     top: 0;
     background-color: #faffae57;
-    border: solid 1px;
-    border-color: inherit;
+    border: solid 2px;
+    border-color: #00ff00;
 }
