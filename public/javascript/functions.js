@@ -8,6 +8,7 @@ $(document).ready(function () {
     refreshMatchupGrid();
 
     $('.record-win-button').on('click', incrementWins);
+    $('.decrement-win-button').on('click', decrementWins);
     $('.merc-select-grid button').on('click', setSelectedClasses);
     $('#tracking-grid th, td').on('click', setSelectedClasses);
     $('#select-map').on('change', setSelectedMap);

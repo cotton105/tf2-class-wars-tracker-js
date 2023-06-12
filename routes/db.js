@@ -14,6 +14,7 @@ router.get('/getMapStages', getMapStages);
 router.get('/getGameModes', getGameModes);
 router.get('/getMatchupScores', getMatchupScores);
 router.post('/incrementWins', incrementWins);
+router.post('/decrementWins', decrementWins);
 
 function getDatabaseConnection(method) {
     return new sqlite3.Database(dbLocation, method, (error) => {
@@ -298,6 +299,16 @@ async function incrementWins(req, res, next) {
         db.close(closeDatabaseCallback);
     } catch (err) {
         next(err);
+    }
+}
+
+async function decrementWins(req, res, next) {
+    try {
+        const error = new Error('decrementWins() not yet implemented.');
+        error.status = 501;
+        throw error;
+    } catch (error) {
+        next(error);
     }
 }
 
