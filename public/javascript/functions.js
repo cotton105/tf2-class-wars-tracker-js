@@ -140,8 +140,8 @@ function highlightSelectedClasses() {
 function toggleOverallOverlay() {
     const checked = $('#overall-checkbox').prop('checked');
     if (checked) {
-        tempSelected = { ...selected };
-        emptyObject(selected);
+        tempSelected = { map: selected.map, stage: selected.stage, gameMode: selected.gameMode };
+        selected = { map: null, stage: null, gameMode: null, merc: { ...selected.merc }};
         $('#select-map').prop('disabled', true);
         $('#select-stage').prop('disabled', true);
         $('#select-game-mode').prop('disabled', true);
@@ -149,7 +149,7 @@ function toggleOverallOverlay() {
         $('#all-stages-checkbox').prop('disabled', true);
         $('#all-game-modes-checkbox').prop('disabled', true);
     } else {
-        selected = tempSelected;
+        selected = { ...selected, ...tempSelected };
         const allMapsChecked = $('#all-maps-checkbox').prop('checked');
         const allStagesChecked = $('#all-stages-checkbox').prop('checked');
         const allGameModesChecked = $('#all-game-modes-checkbox').prop('checked');
