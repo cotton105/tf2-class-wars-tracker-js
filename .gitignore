@@ -4,4 +4,4 @@
 node_modules/
 logs/
 
-classwars-matchups*
+classwars-matchups*.db*
