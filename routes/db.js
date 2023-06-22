@@ -351,7 +351,7 @@ function getNullProperties(obj) {
 }
 
 let exportList = { router };
-if (process.env.NODE_ENV === 'dev') {
+if (process.env.NODE_ENV === 'test') {
     exportList = {
         router,
         getMapID,
