@@ -14,5 +14,8 @@
     "log4js": "^6.9.1",
     "pug": "^3.0.2",
     "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0"
   }
 }
