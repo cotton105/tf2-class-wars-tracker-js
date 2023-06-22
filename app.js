@@ -15,8 +15,10 @@ app.use(express.static(path.join(appRoot, 'public')));
 app.use(express.json());
 app.use(recordConnection);
 
+const dbRouter = require('./routes/db.js').router;
+
 app.get('/', renderHomepage);
-app.use('/api', require('./routes/db'));
+app.use('/api', dbRouter);
 app.all('*', catchPageNotFound);
 
 app.use(handleError);

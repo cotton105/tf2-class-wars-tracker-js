@@ -350,4 +350,22 @@ function getNullProperties(obj) {
     return missingArguments;
 }
 
-module.exports = router;
+let exportList = { router };
+if (process.env.NODE_ENV === 'dev') {
+    exportList = {
+        router,
+        getMapID,
+        getStageID,
+        // getGameModeID,
+        getConfigurationID,
+        getMercenaries,
+        getMaps,
+        getMapStages,
+        getGameModes,
+        getMatchupScores,
+        getMatchupID,
+        incrementWins,
+        decrementWins,
+    };
+}
+module.exports = exportList;
