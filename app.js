@@ -4,14 +4,11 @@ const app = express();
 
 const log = require('./utils/log');
 
-global.appRoot = path.resolve(__dirname);
-global.listenHost = 'localhost';
-global.listenPort = 3000;
-global.listenAddress = `http://${listenHost}:${listenPort}`;
+global.config = require('./config.js');
 
 
 app.set('view engine', 'pug');
-app.use(express.static(path.join(appRoot, 'public')));
+app.use(express.static(path.join(config.appRoot, 'public')));
 app.use(express.json());
 app.use(recordConnection);
 
@@ -23,8 +20,8 @@ app.all('*', catchPageNotFound);
 
 app.use(handleError);
 
-app.listen(listenPort, () => {
-    log.info(`Server listening on ${listenAddress}.`);
+app.listen(config.listenPort, () => {
+    log.info(`Server listening on ${config.listenAddress}.`);
 });
 
 function recordConnection(req, res, next) {

@@ -3,9 +3,9 @@
 const sqlite3 = require('sqlite3').verbose();
 const router = require('express').Router();
 
-const log = require(`${appRoot}/utils/log`);
+const log = require(`${config.appRoot}/utils/log`);
 
-const dbLocation = `${appRoot}/classwars-matchups.db`;
+const dbLocation = `${config.appRoot}/classwars-matchups.db`;
 
 
 router.get('/getMercenaries', getMercenaries);
