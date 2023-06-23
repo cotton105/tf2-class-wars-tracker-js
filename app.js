@@ -7,11 +7,15 @@ const log = require('./utils/log');
 global.config = require('./config.js');
 
 
+const publicDir = path.join(config.appRoot, 'public');
+const viewsDir = path.join(config.appRoot, 'views');
+
 app.set('view engine', 'pug');
-app.use(express.static(path.join(config.appRoot, 'public')));
+app.use(express.static(publicDir));
 app.use(express.json());
 app.use(recordConnection);
 
+let server;
 const dbRouter = require('./routes/db.js').router;
 
 app.get('/', renderHomepage);
@@ -19,10 +23,6 @@ app.use('/api', dbRouter);
 app.all('*', catchPageNotFound);
 
 app.use(handleError);
-
-app.listen(config.listenPort, () => {
-    log.info(`Server listening on ${config.listenAddress}.`);
-});
 
 function recordConnection(req, res, next) {
     let connectingIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
@@ -35,7 +35,7 @@ function renderHomepage(req, res) {
         title: 'APP',
         message: 'Hello world!'
     };
-    res.render('index', options);
+    res.render(path.join(viewsDir, 'index'), options);
 }
 
 function catchPageNotFound(req, res, next) {
@@ -48,3 +48,19 @@ function handleError(error, req, res, next) {
     log.trace(error.stack);
     res.status(error.status).send(error.message);
 }
+
+function start() {
+    server = app.listen(config.listenPort, () => {
+        log.info(`Server listening on ${config.listenAddress}.`);
+    });
+}
+
+function close() {
+    log.info('Closing server...');
+    server.close();
+}
+
+module.exports = {
+    start,
+    close,
+};
