@@ -3,5 +3,6 @@
 
 node_modules/
 logs/
+coverage/
 
 classwars-matchups*.db*
