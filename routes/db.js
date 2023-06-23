@@ -1,11 +1,17 @@
 //TODO: generate database if it doesn't exist
 
 const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
 const router = require('express').Router();
 
 const log = require(`${config.appRoot}/utils/log`);
 
-const dbLocation = `${config.appRoot}/classwars-matchups.db`;
+let dbLocation;
+if (process.env.NODE_ENV == 'test') {
+    dbLocation = path.join(config.appRoot, 'tests', 'classwars-matchups.test.db');
+} else {
+    dbLocation = path.join(config.appRoot, 'classwars-matchups.db');
+}
 
 
 router.get('/getMercenaries', getMercenaries);
