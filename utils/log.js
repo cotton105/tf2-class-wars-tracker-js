@@ -15,13 +15,17 @@ const fileSettings = {
 log4js.configure({
     appenders: {
         out: {
-            type: 'stdout'
+            type: 'stdout',
         },
         info: {
             filename: infoFile,
             ...fileSettings,
         },
         error: {
+            filename: errorFile,
+            ...fileSettings,
+        },
+        trace: {
             filename: errorFile,
             ...fileSettings,
         },
@@ -33,13 +37,13 @@ log4js.configure({
         'just-errors': {
             type: 'logLevelFilter',
             appender: 'error',
-            level: 'error'
+            level: 'error',
         }
     },
     categories: {
         default: {
-            appenders: ['console', 'info', 'just-errors'],
-            level: 'all'
+            appenders: ['console', 'info', 'trace', 'just-errors'],
+            level: 'all',
         }
     }
 });
