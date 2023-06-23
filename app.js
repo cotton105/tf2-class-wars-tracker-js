@@ -60,7 +60,11 @@ function close() {
     server.close();
 }
 
-module.exports = {
+const exportList = {
     start,
     close,
 };
+if (process.env.NODE_ENV === 'test') {
+    exportList.app = app;
+}
+module.exports = exportList;
