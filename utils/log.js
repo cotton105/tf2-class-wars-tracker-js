@@ -16,17 +16,25 @@ log4js.configure({
     appenders: {
         out: {
             type: 'stdout',
+            layout: {
+                type: 'pattern',
+                pattern: '%[[%d] [%p]%] %m',
+            },
         },
-        info: {
+        everything: {
             filename: infoFile,
+            layout: {
+                type: 'pattern',
+                pattern: '[%d] [%p] %m',
+            },
             ...fileSettings,
         },
         error: {
             filename: errorFile,
-            ...fileSettings,
-        },
-        trace: {
-            filename: errorFile,
+            layout: {
+                type: 'pattern',
+                pattern: '[%d] [%p] %f:%l %m%n %s',
+            },
             ...fileSettings,
         },
         console: {
@@ -42,8 +50,9 @@ log4js.configure({
     },
     categories: {
         default: {
-            appenders: ['console', 'info', 'trace', 'just-errors'],
+            appenders: ['console', 'everything', 'just-errors'],
             level: 'all',
+            enableCallStack: true,
         }
     }
 });
