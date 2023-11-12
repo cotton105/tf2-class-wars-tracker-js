@@ -39,13 +39,12 @@ function renderHomepage(req, res) {
 }
 
 function catchPageNotFound(req, res, next) {
-    log.info(`${req.url} not found.`);
+    log.debug(`${req.url} not found.`);
     res.status(404).send('Error');
 }
 
 function handleError(error, req, res, next) {
     log.error(`STATUS ${error.status}: ${error.message}`);
-    log.trace(error.stack);
     res.status(error.status).send(error.message);
 }
 
