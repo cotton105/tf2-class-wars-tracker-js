@@ -21,7 +21,7 @@ router.get('/getMapStages', getMapStagesEndpoint);
 router.get('/getGameModes', getGameModesEndpoint);
 router.get('/getMatchupScores', getMatchupScoresEndpoint);
 router.post('/incrementWins', incrementWinsEndpoint);
-router.post('/decrementWins', decrementWins);
+router.post('/decrementWins', decrementWinsEndpoint);
 
 function getDatabaseConnection(method) {
     return new sqlite3.Database(dbLocation, method, function (error) {
@@ -106,6 +106,32 @@ async function incrementWinsEndpoint(req, res, next) {
             return;
         }
         const result = await incrementWins(matchupSelection);
+        res.send(result);
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function decrementWinsEndpoint(req, res, next) {
+    const matchupSelection = {
+        bluMercID: req.body.bluMercID,
+        redMercID: req.body.redMercID,
+        mapID: req.body.mapID,
+        stage: req.body.stage,
+        gameModeID: req.body.gameModeID,
+        team: req.body.team
+    };
+    try {
+        const missingArguments = getNullProperties(matchupSelection);
+        if (missingArguments.length > 0) {
+            const requestingIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+            const status = 400;
+            const error = new ClientError(`One or more required arguments were not specified: ${missingArguments}`, requestingIP, status);
+            log.warn(error);
+            res.status(status).send(error);
+            return;
+        }
+        const result = await decrementWins(matchupSelection);
         res.send(result);
     } catch (error) {
         next(error);
@@ -369,47 +395,31 @@ async function incrementWins(matchupSelection) {
     });
 }
 
-async function decrementWins(req, res, next) {
-    try {
-        const matchupSelection = {
-            bluMercID: req.body.bluMercID,
-            redMercID: req.body.redMercID,
-            mapID: req.body.mapID,
-            stage: req.body.stage,
-            gameModeID: req.body.gameModeID,
-            team: req.body.team
-        };
-        const missingArguments = getNullProperties(matchupSelection);
-        if (missingArguments.length > 0) {
-            const error = new Error(`One or more required arguments were not specified: ${missingArguments}`);
-            error.status = 400;
-            throw error;
+async function decrementWins(matchupSelection) {
+    const db = getDatabaseConnection(sqlite3.OPEN_READWRITE);
+    const matchupID = await getMatchupID(matchupSelection, db);
+    if (!matchupID) {
+        try {
+            await insertMatchup(matchupSelection, db);
+        } catch (error) {
+            log.error(error);
         }
-        const db = getDatabaseConnection(sqlite3.OPEN_READWRITE);
-        const matchupID = await getMatchupID(matchupSelection, db)
-        .catch((error) => {
-            if (error.status == 202) {
-                return insertMatchup(matchupSelection, db);
-            } else {
-                throw error;
-            }
-        });
-        const configurationID = await getConfigurationID(matchupSelection, db);
-        const decrementString = matchupSelection.team == 'BLU' ? 'BluWins = BluWins - 1' : 'RedWins = RedWins - 1';
-        const query = `UPDATE Matchup SET ${decrementString} WHERE MatchupID = ?`;
+        return;
+    }
+    const configurationID = await getConfigurationID(matchupSelection, db);
+    const decrementString = matchupSelection.team == 'BLU' ? 'BluWins = BluWins - 1' : 'RedWins = RedWins - 1';
+    const query = `UPDATE Matchup SET ${decrementString} WHERE MatchupID = ?`;
+    return new Promise((resolve, reject) => {
         db.run(query, [matchupID], function (error) {
             if (error) {
-                error.status = 500;
-                next(error);
-            } else {
-                log.info(`Decremented ${matchupSelection.team} wins for MatchupID ${matchupID}.`);
-                res.send('Successfully decremented wins.');
+                reject(error);
+                return;
             }
+            log.info(`Decremented ${matchupSelection.team} wins for MatchupID ${matchupID}.`);
+            resolve('Successfully decremented wins.');
         });
-        db.close(closeDatabaseCallback);
-    } catch (error) {
-        next(error);
-    }
+        db.close(closeDatabaseCallback); 
+    });
 }
 
 function getNullProperties(obj) {
