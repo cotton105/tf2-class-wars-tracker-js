@@ -15,7 +15,7 @@ if (process.env.NODE_ENV == 'test') {
 
 
 router.get('/getMercenaries', getMercenaries);
-router.get('/getMaps', getMaps);
+router.get('/getMaps', getMapsEndpoint);
 router.get('/getMapStages', getMapStages);
 router.get('/getGameModes', getGameModes);
 router.get('/getMatchupScores', getMatchupScores);
@@ -33,6 +33,15 @@ function getDatabaseConnection(method) {
 function closeDatabaseCallback(error) {
     if (error) {
         log.error(error.message);
+    }
+}
+
+async function getMapsEndpoint(req, res, next) {
+    try {
+        const maps = await getMaps();
+        res.send(maps);
+    } catch (error) {
+        next(error);
     }
 }
 
@@ -93,19 +102,21 @@ function getMercenaries(req, res, next) {
     }).close(closeDatabaseCallback);
 }
 
-function getMaps(req, res, next) {
+async function getMaps() {
+    return new Promise((resolve, reject) => {
     const query = 'SELECT MapID, ObjectiveID, MapName FROM Map';
     const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
     db.all(query, [], function (error, rows) {
         if (error) {
-            log.error(error.message);
-            res.status(500).send(error.message);
-        } else {
-            res.send(rows.map((row) => {
+                reject(error);
+                return;
+            }
+            const results = rows.map((row) => {
                 return { mapID: row.MapID, mapName: row.MapName };
-            }));
-        }
+            });
+            resolve(results);
     }).close(closeDatabaseCallback);
+    });
 }
 
 function getMapStages(req, res, next) {
