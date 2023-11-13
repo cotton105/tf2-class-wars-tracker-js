@@ -14,7 +14,7 @@ if (process.env.NODE_ENV == 'test') {
 }
 
 
-router.get('/getMercenaries', getMercenaries);
+router.get('/getMercenaries', getMercenariesEndpoint);
 router.get('/getMaps', getMapsEndpoint);
 router.get('/getMapStages', getMapStages);
 router.get('/getGameModes', getGameModes);
@@ -33,6 +33,15 @@ function getDatabaseConnection(method) {
 function closeDatabaseCallback(error) {
     if (error) {
         log.error(error.message);
+    }
+}
+
+async function getMercenariesEndpoint(req, res, next) {
+    try {
+        const mercs = await getMercenaries();
+        res.send(mercs);
+    } catch (error) {
+        next(error);
     }
 }
 
@@ -91,15 +100,19 @@ async function getStageID(mapID, stageNumber, db=null) {
     });
 }
 
-function getMercenaries(req, res, next) {
+async function getMercenaries() {
+    return new Promise((resolve, reject) => {
     const query = `SELECT * FROM Mercenary`;
     const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
     db.all(query, [], (error, rows) => {
         if (error) {
-            throw error;
+                reject(error);
+                return;
         }
-        res.send(rows.map((row) => row.MercenaryName));
+            const results = rows.map((row) => row.MercenaryName);
+            resolve(results);
     }).close(closeDatabaseCallback);
+    });
 }
 
 async function getMaps() {
