@@ -44,8 +44,12 @@ function catchPageNotFound(req, res, next) {
 }
 
 function handleError(error, req, res, next) {
-    log.error(`STATUS ${error.status}: ${error.message}`);
-    res.status(error.status).send(error.message);
+    if (res.headersSent) {
+        next(error);
+        return;
+    }
+    log.error(error);
+    res.status(500).send(error.message);
 }
 
 function start() {
