@@ -25,7 +25,7 @@ function emptyObject(obj) {
  * Set a value to a cookie.
  * @param {string} cname Name of the cookie to set.
  * @param {any} cvalue Value to set for the cookie.
- * @param {number} exdays How many days the cookie should persist for.
+ * @param {number} exdays How many days the cookie should persist for. Leave null to expire with session.
  */
 function setCookie(cname, cvalue, exdays) {
     const date = new Date();
