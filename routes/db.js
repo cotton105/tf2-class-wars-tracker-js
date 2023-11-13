@@ -5,6 +5,7 @@ const path = require('path');
 const router = require('express').Router();
 
 const log = require(`${config.appRoot}/utils/log`);
+const ClientError = require('../errors/ClientError');
 
 let dbLocation;
 if (process.env.NODE_ENV == 'test') {
@@ -19,7 +20,7 @@ router.get('/getMaps', getMapsEndpoint);
 router.get('/getMapStages', getMapStagesEndpoint);
 router.get('/getGameModes', getGameModesEndpoint);
 router.get('/getMatchupScores', getMatchupScoresEndpoint);
-router.post('/incrementWins', incrementWins);
+router.post('/incrementWins', incrementWinsEndpoint);
 router.post('/decrementWins', decrementWins);
 
 function getDatabaseConnection(method) {
@@ -85,6 +86,32 @@ async function getMatchupScoresEndpoint(req, res, next) {
     }
 }
 
+async function incrementWinsEndpoint(req, res, next) {
+    const matchupSelection = {
+        bluMercID: req.body.bluMercID,
+        redMercID: req.body.redMercID,
+        mapID: req.body.mapID,
+        stage: req.body.stage,
+        gameModeID: req.body.gameModeID,
+        winningTeam: req.body.winningTeam
+    };
+    try {
+        const missingArguments = getNullProperties(matchupSelection);
+        if (missingArguments.length > 0) {
+            const requestingIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+            const status = 400;
+            const error = new ClientError(`One or more required arguments were not specified: ${missingArguments}`, requestingIP, status);
+            log.warn(error);
+            res.status(status).send(error);
+            return;
+        }
+        const result = await incrementWins(matchupSelection);
+        res.send(result);
+    } catch (error) {
+        next(error);
+    }
+}
+
 async function getMapID(mapName, db=null) {
     return new Promise((resolve, reject) => {
         if (!mapName) return resolve(null);
@@ -133,25 +160,25 @@ async function getStageID(mapID, stageNumber, db=null) {
 
 async function getMercenaries() {
     return new Promise((resolve, reject) => {
-    const query = `SELECT * FROM Mercenary`;
-    const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
-    db.all(query, [], (error, rows) => {
-        if (error) {
+        const query = `SELECT * FROM Mercenary`;
+        const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
+        db.all(query, [], (error, rows) => {
+            if (error) {
                 reject(error);
                 return;
-        }
+            }
             const results = rows.map((row) => row.MercenaryName);
             resolve(results);
-    }).close(closeDatabaseCallback);
+        }).close(closeDatabaseCallback);
     });
 }
 
 async function getMaps() {
     return new Promise((resolve, reject) => {
-    const query = 'SELECT MapID, ObjectiveID, MapName FROM Map';
-    const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
-    db.all(query, [], function (error, rows) {
-        if (error) {
+        const query = 'SELECT MapID, ObjectiveID, MapName FROM Map';
+        const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
+        db.all(query, [], function (error, rows) {
+            if (error) {
                 reject(error);
                 return;
             }
@@ -159,31 +186,31 @@ async function getMaps() {
                 return { mapID: row.MapID, mapName: row.MapName };
             });
             resolve(results);
-    }).close(closeDatabaseCallback);
+        }).close(closeDatabaseCallback);
     });
 }
 
 async function getMapStages(mapID) {
     return new Promise((resolve, reject) => {
-    const query = 'SELECT StageID, StageNumber FROM Stage WHERE MapID = ?';
-    const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
-    db.all(query, [mapID], function (error, rows) {
-        if (error) {
+        const query = 'SELECT StageID, StageNumber FROM Stage WHERE MapID = ?';
+        const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
+        db.all(query, [mapID], function (error, rows) {
+            if (error) {
                 reject(error);
                 return;
             }
             const results = rows.map((row) => row.StageNumber);
             resolve(results);
-    }).close(closeDatabaseCallback);
+        }).close(closeDatabaseCallback);
     });
 }
 
 async function getGameModes() {
     return new Promise((resolve, reject) => {
-    const query = 'SELECT GameModeID, GameModeName FROM GameMode';
-    const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
-    db.all(query, function (error, rows) {
-        if (error) {
+        const query = 'SELECT GameModeID, GameModeName FROM GameMode';
+        const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
+        db.all(query, function (error, rows) {
+            if (error) {
                 reject(error);
                 return;
             }
@@ -191,20 +218,20 @@ async function getGameModes() {
                 return { name: row.GameModeName, id: row.GameModeID };
             });
             resolve(results);
-    }).close(closeDatabaseCallback);
+        }).close(closeDatabaseCallback);
     });
 }
 
 async function getMatchupScores(mapID, stageID, gameModeID) {
-        const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
-        let resultArray = [mapID, stageID, gameModeID];
-        const dbFilters = [];
-        resultArray[0] && dbFilters.push('mp.MapID = ?');
-        resultArray[1] && dbFilters.push('s.StageID = ?');
-        resultArray[2] && dbFilters.push('mode.GameModeID = ?');
+    const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
+    let resultArray = [mapID, stageID, gameModeID];
+    const dbFilters = [];
+    resultArray[0] && dbFilters.push('mp.MapID = ?');
+    resultArray[1] && dbFilters.push('s.StageID = ?');
+    resultArray[2] && dbFilters.push('mode.GameModeID = ?');
     resultArray = resultArray.filter((result) => result);  // Remove null items from array
     const whereClause = dbFilters.length > 0 ? `WHERE ${dbFilters.join(' AND ')} ` : '';
-        const query = ''.concat(
+    const query = ''.concat(
         'SELECT blu.MercenaryID AS "BluMerc", SUM(mtch.BluWins) AS "BluWins", SUM(mtch.RedWins) AS "RedWins", red.MercenaryID AS "RedMerc" ',
         'FROM Matchup mtch ',
         'JOIN StageGameMode cfg ON cfg.ConfigurationID = mtch.ConfigurationID ',
@@ -212,10 +239,10 @@ async function getMatchupScores(mapID, stageID, gameModeID) {
         'JOIN GameMode mode ON mode.GameModeID = cfg.GameModeID ',
         'JOIN Map mp ON mp.MapID = s.MapID ',
         'JOIN Mercenary blu ON blu.MercenaryID = mtch.BluMercenaryID ',
-                'JOIN Mercenary red ON red.MercenaryID = mtch.RedMercenaryID ',
+        'JOIN Mercenary red ON red.MercenaryID = mtch.RedMercenaryID ',
         whereClause,
-            'GROUP BY mtch.BluMercenaryID, mtch.RedMercenaryID'
-        );
+        'GROUP BY mtch.BluMercenaryID, mtch.RedMercenaryID'
+    );
     return new Promise((resolve, reject) => {
         let scoreArray = [...Array(9)].map((e) => Array(9));  // Create empty 9x9 array
         db.each(query, resultArray, function (error, row) {
@@ -240,8 +267,9 @@ async function getMatchupID(configuration, db=null) {
         const missingItems = getNullProperties(configuration);
         if (missingItems.length > 0) {
             const error = new Error(`One or more arguments not specified: ${missingItems}`);
-            error.status = 400;
-            throw error;
+            log.warn(error);
+            res.status(400).send(error);
+            return;
         }
         let closeWhenDone = false;
         if (!db) {
@@ -259,12 +287,13 @@ async function getMatchupID(configuration, db=null) {
         ];
         db.get(query, values, function (error, row) {
             if (error) {
-                error.status = 500;
-                throw error;
+                reject(error);
+                return;
             } else if (!row) {
-                return reject({ message: 'Matchup not found.', status: 202 });
+                resolve(null);
+                return;
             }
-            return resolve(row.MatchupID)
+            resolve(row.MatchupID)
         });
         if (closeWhenDone) {
             db.close(closeDatabaseCallback);
@@ -274,7 +303,6 @@ async function getMatchupID(configuration, db=null) {
 
 async function insertMatchup(configuration, db=null) {
     const error = new Error('"insertMatchup()" not implemented.');
-    error.status = 501;
     throw error;
 }
 
@@ -314,47 +342,31 @@ async function getConfigurationID(configuration, db=null) {
     });
 }
 
-async function incrementWins(req, res, next) {
-    try {
-        const matchupSelection = {
-            bluMercID: req.body.bluMercID,
-            redMercID: req.body.redMercID,
-            mapID: req.body.mapID,
-            stage: req.body.stage,
-            gameModeID: req.body.gameModeID,
-            winningTeam: req.body.winningTeam
-        };
-        const missingArguments = getNullProperties(matchupSelection);
-        if (missingArguments.length > 0) {
-            const error = new Error(`One or more required arguments were not specified: ${missingArguments}`);
-            error.status = 400;
-            throw error;
+async function incrementWins(matchupSelection) {
+    const db = getDatabaseConnection(sqlite3.OPEN_READWRITE);
+    const matchupID = await getMatchupID(matchupSelection, db);
+    if (!matchupID) {
+        try {
+            await insertMatchup(matchupSelection, db);
+        } catch (error) {
+            log.error(error);
         }
-        const db = getDatabaseConnection(sqlite3.OPEN_READWRITE);
-        const matchupID = await getMatchupID(matchupSelection, db)
-        .catch((error) => {
-            if (error.status == 202) {
-                return insertMatchup(matchupSelection, db);
-            } else {
-                throw error;
-            }
-        });
-        const configurationID = await getConfigurationID(matchupSelection, db);
-        const incrementString = matchupSelection.winningTeam == 'BLU' ? 'BluWins = BluWins + 1' : 'RedWins = RedWins + 1';
-        const query = `UPDATE Matchup SET ${incrementString} WHERE MatchupID = ?`;
+        return;
+    }
+    const configurationID = await getConfigurationID(matchupSelection, db);
+    const incrementString = matchupSelection.winningTeam == 'BLU' ? 'BluWins = BluWins + 1' : 'RedWins = RedWins + 1';
+    const query = `UPDATE Matchup SET ${incrementString} WHERE MatchupID = ?`;
+    return new Promise((resolve, reject) => {
         db.run(query, [matchupID], function (error) {
             if (error) {
-                error.status = 500;
-                next(error);
-            } else {
-                log.info(`Incremented ${matchupSelection.winningTeam} wins for MatchupID ${matchupID}.`);
-                res.send('Successfully incremented wins.');
+                reject(error);
+                return;
             }
+            log.info(`Incremented ${matchupSelection.winningTeam} wins for MatchupID ${matchupID}.`);
+            resolve('Successfully incremented wins.');
         });
         db.close(closeDatabaseCallback);
-    } catch (error) {
-        next(error);
-    }
+    });
 }
 
 async function decrementWins(req, res, next) {
