@@ -18,7 +18,7 @@ router.get('/getMercenaries', getMercenariesEndpoint);
 router.get('/getMaps', getMapsEndpoint);
 router.get('/getMapStages', getMapStagesEndpoint);
 router.get('/getGameModes', getGameModesEndpoint);
-router.get('/getMatchupScores', getMatchupScores);
+router.get('/getMatchupScores', getMatchupScoresEndpoint);
 router.post('/incrementWins', incrementWins);
 router.post('/decrementWins', decrementWins);
 
@@ -68,6 +68,18 @@ async function getGameModesEndpoint(req, res, next) {
     try {
         const gameModes = await getGameModes();
         res.send(gameModes);
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function getMatchupScoresEndpoint(req, res, next) {
+    const mapID = req.query.mapID;
+    const stageID = await getStageID(mapID, req.query.stage);
+    const gameModeID = req.query.gameModeID;
+    try {
+        const results = await getMatchupScores(mapID, stageID, gameModeID);
+        res.send(results);
     } catch (error) {
         next(error);
     }
@@ -183,48 +195,44 @@ async function getGameModes() {
     });
 }
 
-async function getMatchupScores(req, res, next) {
-    try {
+async function getMatchupScores(mapID, stageID, gameModeID) {
         const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
-        let mapID = req.query.mapID;
-        let stageID = await getStageID(mapID, req.query.stage, db);
-        let gameModeID = req.query.gameModeID;
         let resultArray = [mapID, stageID, gameModeID];
-    
         const dbFilters = [];
         resultArray[0] && dbFilters.push('mp.MapID = ?');
         resultArray[1] && dbFilters.push('s.StageID = ?');
         resultArray[2] && dbFilters.push('mode.GameModeID = ?');
-        resultArray = resultArray.filter((result) => result);
-    
+    resultArray = resultArray.filter((result) => result);  // Remove null items from array
+    const whereClause = dbFilters.length > 0 ? `WHERE ${dbFilters.join(' AND ')} ` : '';
         const query = ''.concat(
-            'SELECT blu.MercenaryID AS "BluMerc", SUM(mtch.BluWins) AS "BluWins", SUM(mtch.RedWins) AS "RedWins", red.MercenaryID AS "RedMerc" ' +
-            'FROM Matchup mtch ' +
-                'JOIN StageGameMode cfg ON cfg.ConfigurationID = mtch.ConfigurationID ' +
-                'JOIN Stage s ON s.StageID = cfg.StageID ' +
-                'JOIN GameMode mode ON mode.GameModeID = cfg.GameModeID ' +
-                'JOIN Map mp ON mp.MapID = s.MapID ' +
-                'JOIN Mercenary blu ON blu.MercenaryID = mtch.BluMercenaryID ' +
+        'SELECT blu.MercenaryID AS "BluMerc", SUM(mtch.BluWins) AS "BluWins", SUM(mtch.RedWins) AS "RedWins", red.MercenaryID AS "RedMerc" ',
+        'FROM Matchup mtch ',
+        'JOIN StageGameMode cfg ON cfg.ConfigurationID = mtch.ConfigurationID ',
+        'JOIN Stage s ON s.StageID = cfg.StageID ',
+        'JOIN GameMode mode ON mode.GameModeID = cfg.GameModeID ',
+        'JOIN Map mp ON mp.MapID = s.MapID ',
+        'JOIN Mercenary blu ON blu.MercenaryID = mtch.BluMercenaryID ',
                 'JOIN Mercenary red ON red.MercenaryID = mtch.RedMercenaryID ',
-            dbFilters.length > 0 ? `WHERE ${dbFilters.join(' AND ')} ` : '',
+        whereClause,
             'GROUP BY mtch.BluMercenaryID, mtch.RedMercenaryID'
         );
+    return new Promise((resolve, reject) => {
         let scoreArray = [...Array(9)].map((e) => Array(9));  // Create empty 9x9 array
         db.each(query, resultArray, function (error, row) {
             if (error) {
-                return Promise.reject(error);
+                reject(error);
+                return;
             }
             scoreArray[row.BluMerc - 1][row.RedMerc - 1] = [row.BluWins, row.RedWins];
         }, function (error, count) {
             if (error) {
-                return Promise.reject(error);
+                reject(error);
+                return;
             }
-            res.send(scoreArray);
-            return Promise.resolve();
+            resolve(scoreArray);
         }).close(closeDatabaseCallback);
-    } catch (err) {
-        next(err);
-    }
+        
+    });
 }
 
 async function getMatchupID(configuration, db=null) {
