@@ -17,7 +17,7 @@ if (process.env.NODE_ENV == 'test') {
 router.get('/getMercenaries', getMercenariesEndpoint);
 router.get('/getMaps', getMapsEndpoint);
 router.get('/getMapStages', getMapStagesEndpoint);
-router.get('/getGameModes', getGameModes);
+router.get('/getGameModes', getGameModesEndpoint);
 router.get('/getMatchupScores', getMatchupScores);
 router.post('/incrementWins', incrementWins);
 router.post('/decrementWins', decrementWins);
@@ -59,6 +59,15 @@ async function getMapStagesEndpoint(req, res, next) {
     try {
         const stages = await getMapStages(mapID);
         res.send(stages);
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function getGameModesEndpoint(req, res, next) {
+    try {
+        const gameModes = await getGameModes();
+        res.send(gameModes);
     } catch (error) {
         next(error);
     }
@@ -157,19 +166,21 @@ async function getMapStages(mapID) {
     });
 }
 
-function getGameModes(req, res, next) {
+async function getGameModes() {
+    return new Promise((resolve, reject) => {
     const query = 'SELECT GameModeID, GameModeName FROM GameMode';
     const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
     db.all(query, function (error, rows) {
         if (error) {
-            error.status = 500;
-            next(error);
-        } else {
-            res.send(rows.map((row) => {
+                reject(error);
+                return;
+            }
+            const results = rows.map((row) => {
                 return { name: row.GameModeName, id: row.GameModeID };
-            }));
-        }
+            });
+            resolve(results);
     }).close(closeDatabaseCallback);
+    });
 }
 
 async function getMatchupScores(req, res, next) {
