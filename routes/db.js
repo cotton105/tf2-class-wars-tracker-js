@@ -149,11 +149,13 @@ async function getMapID(mapName, db=null) {
         const query = 'SELECT MapID FROM Map WHERE MapName = ?';
         db.get(query, [mapName], function (error, row) {
             if (error) {
-                return reject(error);
+                reject(error);
+                return;
             } else if (!row) {
-                return reject(`Map '${mapName}' not found.`);
+                resolve(null);
+                return;
             }
-            return resolve(row.MapID);
+            resolve(row.MapID);
         });
         if (closeWhenDone) {
             db.close(closeDatabaseCallback);
@@ -172,11 +174,13 @@ async function getStageID(mapID, stageNumber, db=null) {
         const query = 'SELECT StageID FROM Stage WHERE MapID = ? AND StageNumber = ?';
         db.get(query, [mapID, stageNumber], function (error, row) {
             if (error) {
-                return reject(error);
+                reject(error);
+                return;
             } else if (!row) {
-                return reject({ message: 'No stages found.', status: 500 });
+                resolve(null);
+                return;
             }
-            return resolve(row.StageID);
+            resolve(row.StageID);
         });
         if (closeWhenDone) {
             db.close(closeDatabaseCallback);
@@ -294,7 +298,7 @@ async function getMatchupID(configuration, db=null) {
         if (missingItems.length > 0) {
             const error = new Error(`One or more arguments not specified: ${missingItems}`);
             log.warn(error);
-            res.status(400).send(error);
+            resolve(null);
             return;
         }
         let closeWhenDone = false;
@@ -337,8 +341,9 @@ async function getConfigurationID(configuration, db=null) {
         const missingItems = getNullProperties(configuration);
         if (missingItems.length > 0) {
             const error = new Error(`One or more arguments not specified: ${missingItems}`);
-            error.status = 400;
-            throw error;
+            log.warn(error);
+            reject(error);
+            return;
         }
         let closeWhenDone = false;
         if (!db) {
@@ -355,12 +360,13 @@ async function getConfigurationID(configuration, db=null) {
         const values = [ configuration.mapID, configuration.stage, configuration.gameModeID ];
         db.get(query, values, function (error, row) {
             if (error) {
-                error.status = 500;
-                throw error;
+                reject(error);
+                return;
             } else if (!row) {
-                return reject({ message: `Configuration not found with arguments: ${configuration}`, status: 500 });
+                resolve(null);
+                return;
             }
-            return resolve(row.ConfigurationID);
+            resolve(row.ConfigurationID);
         });
         if (closeWhenDone) {
             db.close(closeDatabaseCallback);
