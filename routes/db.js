@@ -16,7 +16,7 @@ if (process.env.NODE_ENV == 'test') {
 
 router.get('/getMercenaries', getMercenariesEndpoint);
 router.get('/getMaps', getMapsEndpoint);
-router.get('/getMapStages', getMapStages);
+router.get('/getMapStages', getMapStagesEndpoint);
 router.get('/getGameModes', getGameModes);
 router.get('/getMatchupScores', getMatchupScores);
 router.post('/incrementWins', incrementWins);
@@ -49,6 +49,16 @@ async function getMapsEndpoint(req, res, next) {
     try {
         const maps = await getMaps();
         res.send(maps);
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function getMapStagesEndpoint(req, res, next) {
+    const mapID = req.query.mapID;
+    try {
+        const stages = await getMapStages(mapID);
+        res.send(stages);
     } catch (error) {
         next(error);
     }
@@ -132,18 +142,19 @@ async function getMaps() {
     });
 }
 
-function getMapStages(req, res, next) {
-    const mapID = req.query.mapID;
+async function getMapStages(mapID) {
+    return new Promise((resolve, reject) => {
     const query = 'SELECT StageID, StageNumber FROM Stage WHERE MapID = ?';
     const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
     db.all(query, [mapID], function (error, rows) {
         if (error) {
-            error.status = 500;
-            next(error);
-        } else {
-            res.send(rows.map((row) => row.StageNumber));
-        }
+                reject(error);
+                return;
+            }
+            const results = rows.map((row) => row.StageNumber);
+            resolve(results);
     }).close(closeDatabaseCallback);
+    });
 }
 
 function getGameModes(req, res, next) {
