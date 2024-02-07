@@ -342,9 +342,9 @@ async function getMatchupID(configuration, db=null) {
             'FROM Matchup mtch ' +
                 'JOIN StageGameMode cfg ON cfg.ConfigurationID = mtch.ConfigurationID ' +
                 'JOIN Stage s ON s.StageID = cfg.StageID ' +
-            'WHERE s.MapID = ? AND s.StageNumber = ? AND cfg.GameModeID = ? AND mtch.BluMercenaryID = ? AND mtch.RedMercenaryID = ?';
+            'WHERE mtch.ServerID = ? AND s.MapID = ? AND s.StageNumber = ? AND cfg.GameModeID = ? AND mtch.BluMercenaryID = ? AND mtch.RedMercenaryID = ?';
         const values = [
-            configuration.mapID, configuration.stage, configuration.gameModeID, configuration.bluMercID, configuration.redMercID
+            configuration.serverID, configuration.mapID, configuration.stage, configuration.gameModeID, configuration.bluMercID, configuration.redMercID
         ];
         db.get(query, values, function (error, row) {
             if (error) {

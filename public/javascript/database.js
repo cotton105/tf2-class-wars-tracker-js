@@ -14,6 +14,7 @@ async function incrementWins() {
         const data = {
             bluMercID: selected.merc.blu === null ? null : selected.merc.blu + 1,
             redMercID: selected.merc.red === null ? null : selected.merc.red + 1,
+            serverID: selected.server,
             mapID: selected.map,
             stage: selected.stage,
             gameModeID: selected.gameMode,
@@ -37,6 +38,7 @@ async function decrementWins() {
         const data = {
             bluMercID: selected.merc.blu === null ? null : selected.merc.blu + 1,
             redMercID: selected.merc.red === null ? null : selected.merc.red + 1,
+            serverID: selected.server,
             mapID: selected.map,
             stage: selected.stage,
             gameModeID: selected.gameMode,
