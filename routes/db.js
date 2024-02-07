@@ -428,14 +428,14 @@ async function decrementWins(matchupSelection) {
     });
 }
 
-function getNullProperties(obj) {
-    const missingArguments = [];
-    for (const member in obj) {
-        if (!obj[member]) {
-            missingArguments.push(member);
-        }
-    }
-    return missingArguments;
+/**
+ * Gets the properties in `obj` which are null. If `expected` is provided, then only check properties included in `expected`.
+ * @param {Object} obj Object to test for null values.
+ * @param {Array<String>} expected Key names that are expected not to be null.
+ * @returns The object keys which are null.
+ */
+function getNullProperties(obj, expected=Object.keys(obj)) {
+    return expected.filter((key) => !obj[key]);
 }
 
 let exportList = { router };
