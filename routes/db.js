@@ -11,11 +11,12 @@ let dbLocation;
 if (process.env.NODE_ENV == 'test') {
     dbLocation = path.join(config.appRoot, 'tests', 'classwars-matchups.test.db');
 } else {
-    dbLocation = path.join(config.appRoot, 'classwars-matchups.db');
+    dbLocation = path.join(config.appRoot, 'classwars-matchups-server-switch.db');
 }
 
 
 router.get('/getMercenaries', getMercenariesEndpoint);
+router.get('/getServers', getServersEndpoint);
 router.get('/getMaps', getMapsEndpoint);
 router.get('/getMapStages', getMapStagesEndpoint);
 router.get('/getGameModes', getGameModesEndpoint);
@@ -41,6 +42,15 @@ async function getMercenariesEndpoint(req, res, next) {
     try {
         const mercs = await getMercenaries();
         res.send(mercs);
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function getServersEndpoint(req, res, next) {
+    try {
+        const servers = await getServers();
+        res.send(servers);
     } catch (error) {
         next(error);
     }
@@ -200,6 +210,23 @@ async function getMercenaries() {
                 return;
             }
             const results = rows.map((row) => row.MercenaryName);
+            resolve(results);
+        }).close(closeDatabaseCallback);
+    });
+}
+
+async function getServers() {
+    return new Promise((resolve, reject) => {
+        const query = 'SELECT ServerID, ServerName, IpAddress FROM TF2Server';
+        const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
+        db.all(query, [], function (error, rows) {
+            if (error) {
+                reject(error);
+                return;
+            }
+            const results = rows.map((row) => {
+                return { serverID: row.ServerID, serverName: row.ServerName, ipAddress: row.IpAddress };
+            });
             resolve(results);
         }).close(closeDatabaseCallback);
     });

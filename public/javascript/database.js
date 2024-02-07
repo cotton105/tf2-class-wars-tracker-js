@@ -70,6 +70,17 @@ async function fetchMatchupWins() {
     });
 }
 
+async function fetchServers() {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: '/api/getServers',
+            method: 'GET'
+        }).done((response) => {
+            return resolve(response);
+        })
+    });
+}
+
 async function fetchMaps() {
     return new Promise((resolve, reject) => {
         $.ajax({
