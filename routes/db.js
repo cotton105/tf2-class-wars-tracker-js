@@ -90,6 +90,7 @@ async function incrementWinsEndpoint(req, res, next) {
     const matchupSelection = {
         bluMercID: req.body.bluMercID,
         redMercID: req.body.redMercID,
+        serverID: req.body.serverID,
         mapID: req.body.mapID,
         stage: req.body.stage,
         gameModeID: req.body.gameModeID,
@@ -116,6 +117,7 @@ async function decrementWinsEndpoint(req, res, next) {
     const matchupSelection = {
         bluMercID: req.body.bluMercID,
         redMercID: req.body.redMercID,
+        serverID: req.body.serverID,
         mapID: req.body.mapID,
         stage: req.body.stage,
         gameModeID: req.body.gameModeID,
