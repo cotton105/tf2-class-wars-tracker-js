@@ -126,7 +126,6 @@ function setSelectionBoxGameModes() {
 
 function setSelectedServer() {
     updateSelected('server', $('#select-server option:selected').data('server-id'));
-    setSelectionBoxStages();
     refreshMatchupGrid();
 }
 
@@ -148,8 +147,9 @@ function setSelectedGameMode() {
     refreshMatchupGrid();
 }
 
-function refreshMatchupGrid() {
-    fetchMatchupWins().then(function (data) {
+async function refreshMatchupGrid() {
+    try {
+        const data = await fetchMatchupWins();
         for (const bluParent in data) {
             const row = data[bluParent];
             for (const redParent in row) {
@@ -170,9 +170,9 @@ function refreshMatchupGrid() {
                 highlightSelectedClasses();
             }
         }
-    }).catch((error) => {
+    } catch (error) {
         console.error(error);
-    });
+    }
 }
 
 function setSelectedClasses() {

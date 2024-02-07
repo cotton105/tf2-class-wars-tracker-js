@@ -60,6 +60,7 @@ async function fetchMatchupWins() {
             url: '/api/getMatchupScores',
             method: 'GET',
             data: {
+                serverID: selected.server,
                 mapID: selected.map,
                 stage: selected.stage,
                 gameModeID: selected.gameMode

@@ -85,11 +85,12 @@ async function getGameModesEndpoint(req, res, next) {
 }
 
 async function getMatchupScoresEndpoint(req, res, next) {
+    const serverID = req.query.serverID;
     const mapID = req.query.mapID;
     const stageID = await getStageID(mapID, req.query.stage);
     const gameModeID = req.query.gameModeID;
     try {
-        const results = await getMatchupScores(mapID, stageID, gameModeID);
+        const results = await getMatchupScores(serverID, mapID, stageID, gameModeID);
         res.send(results);
     } catch (error) {
         next(error);
@@ -281,13 +282,14 @@ async function getGameModes() {
     });
 }
 
-async function getMatchupScores(mapID, stageID, gameModeID) {
+async function getMatchupScores(serverID, mapID, stageID, gameModeID) {
     const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
-    let resultArray = [mapID, stageID, gameModeID];
+    let resultArray = [serverID, mapID, stageID, gameModeID];
     const dbFilters = [];
-    resultArray[0] && dbFilters.push('mp.MapID = ?');
-    resultArray[1] && dbFilters.push('s.StageID = ?');
-    resultArray[2] && dbFilters.push('mode.GameModeID = ?');
+    resultArray[0] && dbFilters.push('mtch.ServerID = ?');
+    resultArray[1] && dbFilters.push('mp.MapID = ?');
+    resultArray[2] && dbFilters.push('s.StageID = ?');
+    resultArray[3] && dbFilters.push('mode.GameModeID = ?');
     resultArray = resultArray.filter((result) => result);  // Remove null items from array
     const whereClause = dbFilters.length > 0 ? `WHERE ${dbFilters.join(' AND ')} ` : '';
     const query = ''.concat(
@@ -303,7 +305,7 @@ async function getMatchupScores(mapID, stageID, gameModeID) {
         'GROUP BY mtch.BluMercenaryID, mtch.RedMercenaryID'
     );
     return new Promise((resolve, reject) => {
-        let scoreArray = [...Array(9)].map((e) => Array(9));  // Create empty 9x9 array
+        let scoreArray = [...Array(9)].map((e) => Array(9).fill([0, 0]));  // Create empty 9x9 array
         db.each(query, resultArray, function (error, row) {
             if (error) {
                 reject(error);
