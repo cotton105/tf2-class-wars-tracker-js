@@ -98,6 +98,7 @@ async function getMatchupScoresEndpoint(req, res, next) {
 }
 
 async function incrementWinsEndpoint(req, res, next) {
+    const requestingIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const matchupSelection = {
         bluMercID: req.body.bluMercID,
         redMercID: req.body.redMercID,
@@ -108,11 +109,11 @@ async function incrementWinsEndpoint(req, res, next) {
         winningTeam: req.body.winningTeam
     };
     try {
-        const missingArguments = getNullProperties(matchupSelection);
-        if (missingArguments.length > 0) {
-            const requestingIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const expectedArgs = [ 'serverID', 'bluMercID', 'redMercID', 'mapID', 'stage', 'gameModeID', 'winningTeam' ];
+        const missingArgs = getNullProperties(matchupSelection, expectedArgs);
+        if (missingArgs.length > 0) {
             const status = 400;
-            const error = new ClientError(`One or more required arguments were not specified: ${missingArguments}`, requestingIP, status);
+            const error = new ClientError(`One or more required arguments were not specified: ${missingArgs}`, requestingIP, status);
             log.warn(error);
             res.status(status).send(error);
             return;
@@ -125,6 +126,7 @@ async function incrementWinsEndpoint(req, res, next) {
 }
 
 async function decrementWinsEndpoint(req, res, next) {
+    const requestingIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const matchupSelection = {
         bluMercID: req.body.bluMercID,
         redMercID: req.body.redMercID,
@@ -135,9 +137,9 @@ async function decrementWinsEndpoint(req, res, next) {
         team: req.body.team
     };
     try {
-        const missingArguments = getNullProperties(matchupSelection);
+        const expectedArgs = [ 'serverID', 'bluMercID', 'redMercID', 'mapID', 'stage', 'gameModeID', 'team' ];
+        const missingArguments = getNullProperties(matchupSelection, expectedArgs);
         if (missingArguments.length > 0) {
-            const requestingIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
             const status = 400;
             const error = new ClientError(`One or more required arguments were not specified: ${missingArguments}`, requestingIP, status);
             log.warn(error);
@@ -325,7 +327,8 @@ async function getMatchupScores(serverID, mapID, stageID, gameModeID) {
 
 async function getMatchupID(configuration, db=null) {
     return new Promise((resolve, reject) => {
-        const missingItems = getNullProperties(configuration);
+        const expectedArgs = [ 'mapID', 'stage', 'gameModeID', 'bluMercID', 'redMercID' ];
+        const missingItems = getNullProperties(configuration, expectedArgs);
         if (missingItems.length > 0) {
             const error = new Error(`One or more arguments not specified: ${missingItems}`);
             log.warn(error);
@@ -362,14 +365,37 @@ async function getMatchupID(configuration, db=null) {
     });
 }
 
-async function insertMatchup(configuration, db=null) {
-    const error = new Error('"insertMatchup()" not implemented.');
-    throw error;
+async function insertMatchup(configuration) {
+    const configurationID = await getConfigurationID(configuration);
+    return new Promise((resolve, reject) => {
+        const expectedArgs = [ 'serverID', 'bluMercID', 'redMercID' ];
+        const missingArgs = getNullProperties(configuration, expectedArgs);
+        if (missingArgs.length > 0) {
+            const error = new Error(`One or more arguments not specified: ${missingArgs}`);
+            log.warn(error);
+            reject(error);
+            return;
+        }
+        const query =
+            'INSERT INTO Matchup(ConfigurationID, ServerID, BluMercenaryID, RedMercenaryID)' +
+            'VALUES(?, ?, ?, ?)';
+        const values = [ configurationID, configuration.serverID, configuration.bluMercID, configuration.redMercID ];
+        const db = getDatabaseConnection(sqlite3.OPEN_READWRITE);
+        db.run(query, values, function(error) {
+            if (error) {
+                reject(error);
+                return;
+            }
+            log.info(`Added Matchup ${this.lastID} for configuration: ${JSON.stringify(configuration)}`);
+            resolve(this.lastID);
+        });
+    });
 }
 
 async function getConfigurationID(configuration, db=null) {
     return new Promise((resolve, reject) => {
-        const missingItems = getNullProperties(configuration);
+        const expectedArgs = [ 'mapID', 'stage', 'gameModeID' ];
+        const missingItems = getNullProperties(configuration, expectedArgs);
         if (missingItems.length > 0) {
             const error = new Error(`One or more arguments not specified: ${missingItems}`);
             log.warn(error);
@@ -407,16 +433,14 @@ async function getConfigurationID(configuration, db=null) {
 
 async function incrementWins(matchupSelection) {
     const db = getDatabaseConnection(sqlite3.OPEN_READWRITE);
-    const matchupID = await getMatchupID(matchupSelection, db);
+    let matchupID = await getMatchupID(matchupSelection, db);
     if (!matchupID) {
         try {
-            await insertMatchup(matchupSelection, db);
+            matchupID = await insertMatchup(matchupSelection);
         } catch (error) {
             log.error(error);
         }
-        return;
     }
-    const configurationID = await getConfigurationID(matchupSelection, db);
     const incrementString = matchupSelection.winningTeam == 'BLU' ? 'BluWins = BluWins + 1' : 'RedWins = RedWins + 1';
     const query = `UPDATE Matchup SET ${incrementString} WHERE MatchupID = ?`;
     return new Promise((resolve, reject) => {
@@ -434,16 +458,14 @@ async function incrementWins(matchupSelection) {
 
 async function decrementWins(matchupSelection) {
     const db = getDatabaseConnection(sqlite3.OPEN_READWRITE);
-    const matchupID = await getMatchupID(matchupSelection, db);
+    let matchupID = await getMatchupID(matchupSelection, db);
     if (!matchupID) {
         try {
-            await insertMatchup(matchupSelection, db);
+            matchupID = await insertMatchup(matchupSelection);
         } catch (error) {
             log.error(error);
         }
-        return;
     }
-    const configurationID = await getConfigurationID(matchupSelection, db);
     const decrementString = matchupSelection.team == 'BLU' ? 'BluWins = BluWins - 1' : 'RedWins = RedWins - 1';
     const query = `UPDATE Matchup SET ${decrementString} WHERE MatchupID = ?`;
     return new Promise((resolve, reject) => {
