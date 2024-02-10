@@ -8,33 +8,10 @@ function getMercenaries() {
     });
 }
 
-async function incrementWins() {
-    return new Promise((resolve, reject) => {
-        const winningTeam = $(this).data('team');
-        const data = {
-            bluMercID: selected.merc.blu === null ? null : selected.merc.blu + 1,
-            redMercID: selected.merc.red === null ? null : selected.merc.red + 1,
-            serverID: selected.server,
-            mapID: selected.map,
-            stage: selected.stage,
-            gameModeID: selected.gameMode,
-            winningTeam: winningTeam
-        };
-        $.ajax({
-            url: '/api/incrementWins',
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            data: JSON.stringify(data)
-        }).done((response) => {
-            refreshMatchupGrid();
-            return resolve(response);
-        });
-    });
-}
-
-async function decrementWins() {
+async function updateWinCount() {
     return new Promise((resolve, reject) => {
         const team = $(this).data('team');
+        const direction = $(this).data('direction');
         const data = {
             bluMercID: selected.merc.blu === null ? null : selected.merc.blu + 1,
             redMercID: selected.merc.red === null ? null : selected.merc.red + 1,
@@ -42,10 +19,11 @@ async function decrementWins() {
             mapID: selected.map,
             stage: selected.stage,
             gameModeID: selected.gameMode,
-            team: team
+            team: team,
+            direction: direction
         };
         $.ajax({
-            url: '/api/decrementWins',
+            url: '/api/updateWins',
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             data: JSON.stringify(data)

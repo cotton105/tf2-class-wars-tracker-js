@@ -49,8 +49,7 @@ $(document).ready(function () {
     setSelectionBoxGameModes();
     refreshMatchupGrid();
 
-    $('.record-win-button').on('click', incrementWins);
-    $('.decrement-win-button').on('click', decrementWins);
+    $('.record-win-button').on('click', updateWinCount);
     $('.merc-select-grid button').on('click', setSelectedClasses);
     $('#tracking-grid th, td').on('click', setSelectedClasses);
 

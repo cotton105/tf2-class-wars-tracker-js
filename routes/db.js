@@ -21,8 +21,7 @@ router.get('/getMaps', getMapsEndpoint);
 router.get('/getMapStages', getMapStagesEndpoint);
 router.get('/getGameModes', getGameModesEndpoint);
 router.get('/getMatchupScores', getMatchupScoresEndpoint);
-router.post('/incrementWins', incrementWinsEndpoint);
-router.post('/decrementWins', decrementWinsEndpoint);
+router.post('/updateWins', updateWinCountEndpoint);
 
 function getDatabaseConnection(method) {
     return new sqlite3.Database(dbLocation, method, function (error) {
@@ -97,20 +96,11 @@ async function getMatchupScoresEndpoint(req, res, next) {
     }
 }
 
-async function incrementWinsEndpoint(req, res, next) {
+async function updateWinCountEndpoint(req, res, next) {
     const requestingIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    const matchupSelection = {
-        bluMercID: req.body.bluMercID,
-        redMercID: req.body.redMercID,
-        serverID: req.body.serverID,
-        mapID: req.body.mapID,
-        stage: req.body.stage,
-        gameModeID: req.body.gameModeID,
-        winningTeam: req.body.winningTeam
-    };
     try {
-        const expectedArgs = [ 'serverID', 'bluMercID', 'redMercID', 'mapID', 'stage', 'gameModeID', 'winningTeam' ];
-        const missingArgs = getNullProperties(matchupSelection, expectedArgs);
+        const expectedArgs = [ 'serverID', 'bluMercID', 'redMercID', 'mapID', 'stage', 'gameModeID', 'team', 'direction' ];
+        const missingArgs = getNullProperties(req.body, expectedArgs);
         if (missingArgs.length > 0) {
             const status = 400;
             const error = new ClientError(`One or more required arguments were not specified: ${missingArgs}`, requestingIP, status);
@@ -118,35 +108,7 @@ async function incrementWinsEndpoint(req, res, next) {
             res.status(status).send(error);
             return;
         }
-        const result = await incrementWins(matchupSelection);
-        res.send(result);
-    } catch (error) {
-        next(error);
-    }
-}
-
-async function decrementWinsEndpoint(req, res, next) {
-    const requestingIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    const matchupSelection = {
-        bluMercID: req.body.bluMercID,
-        redMercID: req.body.redMercID,
-        serverID: req.body.serverID,
-        mapID: req.body.mapID,
-        stage: req.body.stage,
-        gameModeID: req.body.gameModeID,
-        team: req.body.team
-    };
-    try {
-        const expectedArgs = [ 'serverID', 'bluMercID', 'redMercID', 'mapID', 'stage', 'gameModeID', 'team' ];
-        const missingArguments = getNullProperties(matchupSelection, expectedArgs);
-        if (missingArguments.length > 0) {
-            const status = 400;
-            const error = new ClientError(`One or more required arguments were not specified: ${missingArguments}`, requestingIP, status);
-            log.warn(error);
-            res.status(status).send(error);
-            return;
-        }
-        const result = await decrementWins(matchupSelection);
+        const result = await updateWinCount(req.body);
         res.send(result);
     } catch (error) {
         next(error);
@@ -431,53 +393,31 @@ async function getConfigurationID(configuration, db=null) {
     });
 }
 
-async function incrementWins(matchupSelection) {
+async function updateWinCount(matchupConfig) {
     const db = getDatabaseConnection(sqlite3.OPEN_READWRITE);
-    let matchupID = await getMatchupID(matchupSelection, db);
+    let matchupID = await getMatchupID(matchupConfig, db);
     if (!matchupID) {
         try {
-            matchupID = await insertMatchup(matchupSelection);
+            matchupID = await insertMatchup(matchupConfig);
         } catch (error) {
             log.error(error);
         }
     }
-    const incrementString = matchupSelection.winningTeam == 'BLU' ? 'BluWins = BluWins + 1' : 'RedWins = RedWins + 1';
-    const query = `UPDATE Matchup SET ${incrementString} WHERE MatchupID = ?`;
+    const team = matchupConfig.team == 'BLU' ? 'BluWins' : 'RedWins';
+    const direction = matchupConfig.direction == '+' ? '+' : '-';
+    const amount = direction == '+' ? 1 : -1;
     return new Promise((resolve, reject) => {
-        db.run(query, [matchupID], function (error) {
+        const updateString = `${team} = ${team} ${direction} 1`;
+        const query = `UPDATE Matchup SET ${updateString} WHERE MatchupID = ?`;
+        db.run(query, [ matchupID ], function (error) {
             if (error) {
                 reject(error);
                 return;
             }
-            log.info(`Incremented ${matchupSelection.winningTeam} wins for MatchupID ${matchupID}.`);
-            resolve('Successfully incremented wins.');
+            log.info(`Updated ${matchupConfig.team} wins by ${amount} for MatchupID ${matchupID}.`);
+            resolve('Successfully updated win count.');
         });
         db.close(closeDatabaseCallback);
-    });
-}
-
-async function decrementWins(matchupSelection) {
-    const db = getDatabaseConnection(sqlite3.OPEN_READWRITE);
-    let matchupID = await getMatchupID(matchupSelection, db);
-    if (!matchupID) {
-        try {
-            matchupID = await insertMatchup(matchupSelection);
-        } catch (error) {
-            log.error(error);
-        }
-    }
-    const decrementString = matchupSelection.team == 'BLU' ? 'BluWins = BluWins - 1' : 'RedWins = RedWins - 1';
-    const query = `UPDATE Matchup SET ${decrementString} WHERE MatchupID = ?`;
-    return new Promise((resolve, reject) => {
-        db.run(query, [matchupID], function (error) {
-            if (error) {
-                reject(error);
-                return;
-            }
-            log.info(`Decremented ${matchupSelection.team} wins for MatchupID ${matchupID}.`);
-            resolve('Successfully decremented wins.');
-        });
-        db.close(closeDatabaseCallback); 
     });
 }
 
@@ -505,8 +445,7 @@ if (process.env.NODE_ENV === 'test') {
         getGameModes,
         getMatchupScores,
         getMatchupID,
-        incrementWins,
-        decrementWins,
+        updateWinCount,
     };
 }
 module.exports = exportList;
