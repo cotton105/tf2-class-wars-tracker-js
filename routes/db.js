@@ -11,11 +11,12 @@ let dbLocation;
 if (process.env.NODE_ENV == 'test') {
     dbLocation = path.join(config.appRoot, 'tests', 'classwars-matchups.test.db');
 } else {
-    dbLocation = path.join(config.appRoot, 'classwars-matchups.db');
+    dbLocation = path.join(config.appRoot, 'classwars-matchups-server-switch.db');
 }
 
 
 router.get('/getMercenaries', getMercenariesEndpoint);
+router.get('/getServers', getServersEndpoint);
 router.get('/getMaps', getMapsEndpoint);
 router.get('/getMapStages', getMapStagesEndpoint);
 router.get('/getGameModes', getGameModesEndpoint);
@@ -41,6 +42,15 @@ async function getMercenariesEndpoint(req, res, next) {
     try {
         const mercs = await getMercenaries();
         res.send(mercs);
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function getServersEndpoint(req, res, next) {
+    try {
+        const servers = await getServers();
+        res.send(servers);
     } catch (error) {
         next(error);
     }
@@ -75,11 +85,12 @@ async function getGameModesEndpoint(req, res, next) {
 }
 
 async function getMatchupScoresEndpoint(req, res, next) {
+    const serverID = req.query.serverID;
     const mapID = req.query.mapID;
     const stageID = await getStageID(mapID, req.query.stage);
     const gameModeID = req.query.gameModeID;
     try {
-        const results = await getMatchupScores(mapID, stageID, gameModeID);
+        const results = await getMatchupScores(serverID, mapID, stageID, gameModeID);
         res.send(results);
     } catch (error) {
         next(error);
@@ -90,6 +101,7 @@ async function incrementWinsEndpoint(req, res, next) {
     const matchupSelection = {
         bluMercID: req.body.bluMercID,
         redMercID: req.body.redMercID,
+        serverID: req.body.serverID,
         mapID: req.body.mapID,
         stage: req.body.stage,
         gameModeID: req.body.gameModeID,
@@ -116,6 +128,7 @@ async function decrementWinsEndpoint(req, res, next) {
     const matchupSelection = {
         bluMercID: req.body.bluMercID,
         redMercID: req.body.redMercID,
+        serverID: req.body.serverID,
         mapID: req.body.mapID,
         stage: req.body.stage,
         gameModeID: req.body.gameModeID,
@@ -203,6 +216,23 @@ async function getMercenaries() {
     });
 }
 
+async function getServers() {
+    return new Promise((resolve, reject) => {
+        const query = 'SELECT ServerID, ServerName, IpAddress FROM TF2Server';
+        const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
+        db.all(query, [], function (error, rows) {
+            if (error) {
+                reject(error);
+                return;
+            }
+            const results = rows.map((row) => {
+                return { serverID: row.ServerID, serverName: row.ServerName, ipAddress: row.IpAddress };
+            });
+            resolve(results);
+        }).close(closeDatabaseCallback);
+    });
+}
+
 async function getMaps() {
     return new Promise((resolve, reject) => {
         const query = 'SELECT MapID, ObjectiveID, MapName FROM Map';
@@ -252,13 +282,14 @@ async function getGameModes() {
     });
 }
 
-async function getMatchupScores(mapID, stageID, gameModeID) {
+async function getMatchupScores(serverID, mapID, stageID, gameModeID) {
     const db = getDatabaseConnection(sqlite3.OPEN_READONLY);
-    let resultArray = [mapID, stageID, gameModeID];
+    let resultArray = [serverID, mapID, stageID, gameModeID];
     const dbFilters = [];
-    resultArray[0] && dbFilters.push('mp.MapID = ?');
-    resultArray[1] && dbFilters.push('s.StageID = ?');
-    resultArray[2] && dbFilters.push('mode.GameModeID = ?');
+    resultArray[0] && dbFilters.push('mtch.ServerID = ?');
+    resultArray[1] && dbFilters.push('mp.MapID = ?');
+    resultArray[2] && dbFilters.push('s.StageID = ?');
+    resultArray[3] && dbFilters.push('mode.GameModeID = ?');
     resultArray = resultArray.filter((result) => result);  // Remove null items from array
     const whereClause = dbFilters.length > 0 ? `WHERE ${dbFilters.join(' AND ')} ` : '';
     const query = ''.concat(
@@ -274,7 +305,7 @@ async function getMatchupScores(mapID, stageID, gameModeID) {
         'GROUP BY mtch.BluMercenaryID, mtch.RedMercenaryID'
     );
     return new Promise((resolve, reject) => {
-        let scoreArray = [...Array(9)].map((e) => Array(9));  // Create empty 9x9 array
+        let scoreArray = [...Array(9)].map((e) => Array(9).fill([0, 0]));  // Create empty 9x9 array
         db.each(query, resultArray, function (error, row) {
             if (error) {
                 reject(error);
@@ -311,9 +342,9 @@ async function getMatchupID(configuration, db=null) {
             'FROM Matchup mtch ' +
                 'JOIN StageGameMode cfg ON cfg.ConfigurationID = mtch.ConfigurationID ' +
                 'JOIN Stage s ON s.StageID = cfg.StageID ' +
-            'WHERE s.MapID = ? AND s.StageNumber = ? AND cfg.GameModeID = ? AND mtch.BluMercenaryID = ? AND mtch.RedMercenaryID = ?';
+            'WHERE mtch.ServerID = ? AND s.MapID = ? AND s.StageNumber = ? AND cfg.GameModeID = ? AND mtch.BluMercenaryID = ? AND mtch.RedMercenaryID = ?';
         const values = [
-            configuration.mapID, configuration.stage, configuration.gameModeID, configuration.bluMercID, configuration.redMercID
+            configuration.serverID, configuration.mapID, configuration.stage, configuration.gameModeID, configuration.bluMercID, configuration.redMercID
         ];
         db.get(query, values, function (error, row) {
             if (error) {

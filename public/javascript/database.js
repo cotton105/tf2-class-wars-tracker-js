@@ -14,6 +14,7 @@ async function incrementWins() {
         const data = {
             bluMercID: selected.merc.blu === null ? null : selected.merc.blu + 1,
             redMercID: selected.merc.red === null ? null : selected.merc.red + 1,
+            serverID: selected.server,
             mapID: selected.map,
             stage: selected.stage,
             gameModeID: selected.gameMode,
@@ -37,6 +38,7 @@ async function decrementWins() {
         const data = {
             bluMercID: selected.merc.blu === null ? null : selected.merc.blu + 1,
             redMercID: selected.merc.red === null ? null : selected.merc.red + 1,
+            serverID: selected.server,
             mapID: selected.map,
             stage: selected.stage,
             gameModeID: selected.gameMode,
@@ -60,6 +62,7 @@ async function fetchMatchupWins() {
             url: '/api/getMatchupScores',
             method: 'GET',
             data: {
+                serverID: selected.server,
                 mapID: selected.map,
                 stage: selected.stage,
                 gameModeID: selected.gameMode
@@ -67,6 +70,17 @@ async function fetchMatchupWins() {
         }).done((response) => {
             return resolve(response);
         });
+    });
+}
+
+async function fetchServers() {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: '/api/getServers',
+            method: 'GET'
+        }).done((response) => {
+            return resolve(response);
+        })
     });
 }
 

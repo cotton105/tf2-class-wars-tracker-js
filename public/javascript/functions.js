@@ -4,6 +4,7 @@ $(document).ready(function () {
             blu: null,
             red: null
         },
+        server: null,
         map: null,
         stage: null,
         gameMode: null,
@@ -22,15 +23,19 @@ $(document).ready(function () {
     } catch (error) {
         console.error(error);
     }
+    $('#all-servers-checkbox').prop('checked', !selected.server);
     $('#all-maps-checkbox').prop('checked', !selected.map);
     $('#all-stages-checkbox').prop('checked', !selected.stage);
     $('#all-stages-checkbox').prop('disabled', !selected.map);
     $('#all-game-modes-checkbox').prop('checked', !selected.gameMode);
+    $('#select-server').prop('disabled', !selected.server);
     $('#select-map').prop('disabled', !selected.map);
     $('#select-stage').prop('disabled', !selected.stage);
     $('#select-game-mode').prop('disabled', !selected.gameMode);
     if (selected.overall) {
         $('#overall-checkbox').prop('checked', true);
+        $('#all-servers-checkbox').prop('disabled', true);
+        $('#all-servers-checkbox').prop('checked', !tempSelected.server);
         $('#all-maps-checkbox').prop('disabled', true);
         $('#all-maps-checkbox').prop('checked', !tempSelected.map);
         $('#all-stages-checkbox').prop('disabled', true);
@@ -38,6 +43,7 @@ $(document).ready(function () {
         $('#all-game-modes-checkbox').prop('disabled', true);
         $('#all-game-modes-checkbox').prop('checked', !tempSelected.gameMode);
     }
+    setSelectionBoxServers();
     setSelectionBoxMaps();
     setSelectionBoxStages();
     setSelectionBoxGameModes();
@@ -47,10 +53,14 @@ $(document).ready(function () {
     $('.decrement-win-button').on('click', decrementWins);
     $('.merc-select-grid button').on('click', setSelectedClasses);
     $('#tracking-grid th, td').on('click', setSelectedClasses);
+
+    $('#select-server').on('change', setSelectedServer);
     $('#select-map').on('change', setSelectedMap);
     $('#select-stage').on('change', setSelectedStage);
     $('#select-game-mode').on('change', setSelectedGameMode);
     $('#overall-checkbox').on('click', toggleOverallOverlay);
+
+    $('#all-servers-checkbox').on('click', toggleAllServers);
     $('#all-maps-checkbox').on('click', toggleAllMaps);
     $('#all-stages-checkbox').on('click', toggleAllStages);
     $('#all-game-modes-checkbox').on('click', toggleAllGameModes);
@@ -61,6 +71,19 @@ let tempSelected;
 
 const BLU_COLOR = '#abcbff';
 const RED_COLOR = '#ff7d7d';
+
+async function setSelectionBoxServers() {
+    try {
+        const servers = await fetchServers();
+        for (let server of servers) {
+            $('#select-server').append(`<option data-server-id='${server.serverID}'>${server.serverName}</option>`);
+        }
+        const selectedServerID = tempSelected.server || selected.server;
+        $(`#select-server option[data-server-id='${selectedServerID}']`).prop('selected', true);
+    } catch (error) {
+        console.error(error);
+    }
+}
 
 function setSelectionBoxMaps() {
     fetchMaps().then((maps) => {
@@ -101,6 +124,11 @@ function setSelectionBoxGameModes() {
     });
 }
 
+function setSelectedServer() {
+    updateSelected('server', $('#select-server option:selected').data('server-id'));
+    refreshMatchupGrid();
+}
+
 function setSelectedMap() {
     updateSelected('map', $('#select-map option:selected').data('map-id'));
     const allStagesChecked = $('#all-stages-checkbox').prop('checked');
@@ -119,8 +147,9 @@ function setSelectedGameMode() {
     refreshMatchupGrid();
 }
 
-function refreshMatchupGrid() {
-    fetchMatchupWins().then(function (data) {
+async function refreshMatchupGrid() {
+    try {
+        const data = await fetchMatchupWins();
         for (const bluParent in data) {
             const row = data[bluParent];
             for (const redParent in row) {
@@ -141,9 +170,9 @@ function refreshMatchupGrid() {
                 highlightSelectedClasses();
             }
         }
-    }).catch((error) => {
+    } catch (error) {
         console.error(error);
-    });
+    }
 }
 
 function setSelectedClasses() {
@@ -183,9 +212,11 @@ function toggleOverallOverlay() {
         selected = { map: null, stage: null, gameMode: null, merc: { ...selected.merc }, overall: true };
         setCookie('tempSelected', JSON.stringify(tempSelected));
         setCookie('selected', JSON.stringify(selected));
+        $('#select-server').prop('disabled', true);
         $('#select-map').prop('disabled', true);
         $('#select-stage').prop('disabled', true);
         $('#select-game-mode').prop('disabled', true);
+        $('#all-servers-checkbox').prop('disabled', true);
         $('#all-maps-checkbox').prop('disabled', true);
         $('#all-stages-checkbox').prop('disabled', true);
         $('#all-game-modes-checkbox').prop('disabled', true);
@@ -194,16 +225,26 @@ function toggleOverallOverlay() {
         tempSelected = null;
         setCookie('selected', JSON.stringify(selected));
         deleteCookie('tempSelected');
+        const allServersChecked = $('#all-servers-checkbox').prop('checked');
         const allMapsChecked = $('#all-maps-checkbox').prop('checked');
         const allStagesChecked = $('#all-stages-checkbox').prop('checked');
         const allGameModesChecked = $('#all-game-modes-checkbox').prop('checked');
+        $('#all-servers-checkbox').prop('disabled', false);
         $('#all-maps-checkbox').prop('disabled', false);
         $('#all-stages-checkbox').prop('disabled', allMapsChecked);
         $('#all-game-modes-checkbox').prop('disabled', false);
+        $('#select-server').prop('disabled', allServersChecked);
         $('#select-map').prop('disabled', allMapsChecked);
         $('#select-stage').prop('disabled', allStagesChecked);
         $('#select-game-mode').prop('disabled', allGameModesChecked);
     }
+    refreshMatchupGrid();
+}
+
+function toggleAllServers() {
+    const checked = $('#all-servers-checkbox').prop('checked');
+    $('#select-server').prop('disabled', checked);
+    updateSelected('server', checked ? null : $('#select-server option:selected').data('server-id'));
     refreshMatchupGrid();
 }
 
