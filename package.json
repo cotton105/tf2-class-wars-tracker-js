@@ -18,5 +18,8 @@
   "devDependencies": {
     "jest": "^29.5.0",
     "supertest": "^6.3.3"
+  },
+  "overrides": {
+    "formidable": ">=3.2.4"
   }
 }
